@@ -86,13 +86,13 @@ export default function Editor({
 
         .editor-content {
           width: 100%;
-          padding: 48px 40px;
-          min-height: 500px;
+          padding: 32px;
+          min-height: 400px;
           overflow-y: auto;
-          max-height: calc(100vh - 200px);
-          line-height: 1.7;
+          max-height: calc(100vh - 180px);
+          line-height: 1.6;
           font-size: 16px;
-          color: #1e293b;
+          color: #374151;
         }
 
         /* =================== EDITOR CORE STYLES =================== */
@@ -134,83 +134,80 @@ export default function Editor({
           background: transparent;
           border: none;
           padding: 0;
-          margin: 0 0 16px 0;
+          margin: 0 0 12px 0;
           display: flex;
-          gap: 6px;
+          gap: 4px;
           align-items: center;
         }
 
         .ce-toolbar__plus {
-          width: 36px;
-          height: 36px;
+          width: 32px;
+          height: 32px;
           padding: 0;
-          border-radius: 10px;
-          background: #f8fafc;
-          border: 1px solid #e2e8f0;
+          border-radius: 6px;
+          background: #f9fafb;
+          border: 1px solid #e5e7eb;
           color: #3b82f6;
           cursor: pointer;
           flex-shrink: 0;
           display: flex;
           align-items: center;
           justify-content: center;
-          transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-          font-size: 18px;
+          transition: all 0.15s ease;
+          font-size: 16px;
           font-weight: 400;
         }
 
         .ce-toolbar__plus:hover {
           background: #eff6ff;
           border-color: #3b82f6;
-          box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
-          transform: translateY(-1px);
+          box-shadow: 0 2px 4px rgba(59, 130, 246, 0.1);
         }
 
         .ce-toolbar__settings-btn {
-          width: 36px;
-          height: 36px;
+          width: 32px;
+          height: 32px;
           padding: 0;
-          border-radius: 10px;
-          background: #f8fafc;
-          border: 1px solid #e2e8f0;
-          color: #64748b;
+          border-radius: 6px;
+          background: #f9fafb;
+          border: 1px solid #e5e7eb;
+          color: #6b7280;
           cursor: pointer;
           flex-shrink: 0;
           display: flex;
           align-items: center;
           justify-content: center;
-          transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+          transition: all 0.15s ease;
         }
 
         .ce-toolbar__settings-btn:hover {
-          background: #f1f5f9;
-          border-color: #cbd5e1;
-          transform: translateY(-1px);
+          background: #f3f4f6;
+          border-color: #d1d5db;
         }
 
         /* =================== INLINE TOOLBAR =================== */
         .ce-inline-toolbar {
           background: #ffffff;
-          border: 1px solid #e2e8f0;
-          border-radius: 16px;
-          box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08), 0 8px 16px rgba(0, 0, 0, 0.04);
-          padding: 8px;
+          border: 1px solid #e5e7eb;
+          border-radius: 8px;
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+          padding: 4px;
           z-index: 1000;
           position: fixed !important;
-          backdrop-filter: blur(12px);
         }
 
         .ce-inline-tool {
-          width: 36px;
-          height: 36px;
+          width: 32px;
+          height: 32px;
           padding: 0;
-          border-radius: 8px;
-          color: #475569;
+          border-radius: 4px;
+          color: #374151;
           cursor: pointer;
           flex-shrink: 0;
           display: flex;
           align-items: center;
           justify-content: center;
-          transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+          transition: all 0.15s ease;
           background: transparent;
           border: none;
           line-height: 1;
@@ -218,28 +215,25 @@ export default function Editor({
         }
 
         .ce-inline-tool:hover {
-          background: #f1f5f9;
-          color: #1e293b;
-          transform: scale(1.05);
+          background: #f3f4f6;
+          color: #111827;
         }
 
         .ce-inline-tool--active {
-          background: #eff6ff !important;
+          background: #dbeafe !important;
           color: #2563eb !important;
-          box-shadow: 0 2px 4px rgba(37, 99, 235, 0.1);
         }
 
         /* =================== POPOVER STYLES =================== */
         .ce-popover {
           background: #ffffff !important;
-          border: 1px solid #e2e8f0 !important;
-          border-radius: 20px !important;
-          box-shadow: 0 25px 50px rgba(0, 0, 0, 0.08), 0 10px 20px rgba(0, 0, 0, 0.04) !important;
-          padding: 16px !important;
+          border: 1px solid #e5e7eb !important;
+          border-radius: 8px !important;
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+          padding: 8px !important;
           z-index: 1001;
           position: fixed !important;
-          max-width: 340px;
-          backdrop-filter: blur(16px);
+          max-width: 280px;
         }
 
         .ce-popover__container {
@@ -272,36 +266,34 @@ export default function Editor({
         }
 
         .ce-popover-item {
-          border-radius: 12px;
-          padding: 14px 16px;
-          margin: 2px 0;
-          transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+          border-radius: 4px;
+          padding: 8px 12px;
+          margin: 1px 0;
+          transition: all 0.15s ease;
           display: flex;
           align-items: center;
-          gap: 14px;
+          gap: 8px;
           cursor: pointer;
           background: transparent;
           border: none;
           width: 100%;
           text-align: left;
-          color: #1e293b;
+          color: #374151;
           font-size: 14px;
-          font-weight: 500;
+          font-weight: 400;
         }
 
         .ce-popover-item:hover {
-          background: #f8fafc;
-          transform: translateX(4px);
-          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+          background: #f3f4f6;
         }
 
         .ce-popover-item--active {
-          background: #eff6ff;
+          background: #dbeafe;
           color: #2563eb;
         }
 
         .ce-popover-item--active:hover {
-          background: #dbeafe;
+          background: #bfdbfe;
         }
 
         .ce-popover-item__icon {
@@ -387,16 +379,16 @@ export default function Editor({
 
         /* =================== TEXT ELEMENTS =================== */
         .ce-paragraph {
-          line-height: 1.8;
-          color: #334155;
+          line-height: 1.6;
+          color: #374151;
           font-size: 16px;
           width: 100%;
-          margin: 12px 0;
+          margin: 8px 0;
           font-weight: 400;
         }
 
         .ce-paragraph[contentEditable=true][data-placeholder]:empty:before {
-          color: #94a3b8;
+          color: #9ca3af;
           font-size: 16px;
           font-style: normal;
           font-weight: 400;
@@ -597,24 +589,9 @@ export default function Editor({
           letter-spacing: 6px;
         }
 
-        /* =================== FOCUS STATES =================== */
-        .ce-block--focused {
-          background: rgba(59, 130, 246, 0.02);
-          border-radius: 8px;
-          padding: 4px 8px;
-          margin: 8px -8px;
-          transition: all 0.2s ease;
-        }
-
-        /* =================== SELECTION STYLES =================== */
-        ::selection {
-          background: rgba(59, 130, 246, 0.15);
-          color: inherit;
-        }
-
         /* =================== SCROLLBAR =================== */
         .editor-content::-webkit-scrollbar {
-          width: 6px;
+          width: 4px;
         }
 
         .editor-content::-webkit-scrollbar-track {
@@ -622,12 +599,12 @@ export default function Editor({
         }
 
         .editor-content::-webkit-scrollbar-thumb {
-          background: #cbd5e1;
-          border-radius: 3px;
+          background: #d1d5db;
+          border-radius: 2px;
         }
 
         .editor-content::-webkit-scrollbar-thumb:hover {
-          background: #94a3b8;
+          background: #9ca3af;
         }
       `}</style>
     </div>

@@ -97,7 +97,22 @@ export const EDITOR_TOOLS = {
 export const EDITOR_CONFIG = {
   holder: 'editorjs',
   tools: EDITOR_TOOLS,
-  placeholder: 'Start writing your content...',
+  placeholder: 'Start writing...',
   autofocus: true,
-  minHeight: 300,
+  minHeight: 200,
+  defaultBlock: 'paragraph',
+  sanitizer: {
+    b: true,
+    i: true,
+    u: true,
+    s: true,
+    a: {
+      href: true,
+      target: '_blank',
+      rel: 'noopener noreferrer',
+    },
+    mark: true,
+    code: true,
+  },
+  logLevel: 'ERROR' as const,
 };

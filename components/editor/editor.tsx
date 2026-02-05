@@ -86,13 +86,13 @@ export default function Editor({
 
         .editor-content {
           width: 100%;
-          padding: 48px 40px;
-          min-height: 500px;
+          padding: 24px;
+          min-height: 300px;
           overflow-y: auto;
-          max-height: calc(100vh - 200px);
-          line-height: 1.7;
+          max-height: calc(100vh - 160px);
+          line-height: 1.6;
           font-size: 16px;
-          color: #1e293b;
+          color: #374151;
         }
 
         /* =================== EDITOR CORE STYLES =================== */

@@ -81,16 +81,18 @@ export default function Editor({
           width: 100%;
           position: relative;
           background: white;
-          border-radius: 16px;
           overflow: hidden;
         }
 
         .editor-content {
           width: 100%;
-          padding: 32px;
-          min-height: 600px;
+          padding: 48px 40px;
+          min-height: 500px;
           overflow-y: auto;
-          max-height: calc(100vh - 160px);
+          max-height: calc(100vh - 200px);
+          line-height: 1.7;
+          font-size: 16px;
+          color: #1e293b;
         }
 
         /* =================== EDITOR CORE STYLES =================== */
@@ -121,117 +123,123 @@ export default function Editor({
         .ce-toolbar {
           width: 100% !important;
           max-width: 100% !important;
-          position: sticky;
-          top: 0;
-          background: white;
+          position: relative;
+          background: transparent;
           z-index: 100;
         }
 
         .ce-toolbar__content {
           width: 100% !important;
           max-width: 100% !important;
-          background: white;
-          border-bottom: 2px solid #f3f4f6;
-          padding: 12px 0;
-          margin-bottom: 24px;
+          background: transparent;
+          border: none;
+          padding: 0;
+          margin: 0 0 16px 0;
           display: flex;
-          gap: 8px;
+          gap: 6px;
           align-items: center;
         }
 
         .ce-toolbar__plus {
-          width: 32px;
-          height: 32px;
-          padding: 6px;
-          border-radius: 8px;
-          background: white;
-          border: 1px solid #e5e7eb;
+          width: 36px;
+          height: 36px;
+          padding: 0;
+          border-radius: 10px;
+          background: #f8fafc;
+          border: 1px solid #e2e8f0;
           color: #3b82f6;
           cursor: pointer;
           flex-shrink: 0;
           display: flex;
           align-items: center;
           justify-content: center;
-          transition: all 0.2s ease;
+          transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+          font-size: 18px;
+          font-weight: 400;
         }
 
         .ce-toolbar__plus:hover {
           background: #eff6ff;
           border-color: #3b82f6;
-          box-shadow: 0 2px 8px rgba(59, 130, 246, 0.12);
+          box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
+          transform: translateY(-1px);
         }
 
         .ce-toolbar__settings-btn {
-          width: 32px;
-          height: 32px;
-          padding: 6px;
-          border-radius: 8px;
-          background: white;
-          border: 1px solid #e5e7eb;
-          color: #6b7280;
+          width: 36px;
+          height: 36px;
+          padding: 0;
+          border-radius: 10px;
+          background: #f8fafc;
+          border: 1px solid #e2e8f0;
+          color: #64748b;
           cursor: pointer;
           flex-shrink: 0;
           display: flex;
           align-items: center;
           justify-content: center;
-          transition: all 0.2s ease;
+          transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         .ce-toolbar__settings-btn:hover {
-          background: #f3f4f6;
-          border-color: #d1d5db;
+          background: #f1f5f9;
+          border-color: #cbd5e1;
+          transform: translateY(-1px);
         }
 
         /* =================== INLINE TOOLBAR =================== */
         .ce-inline-toolbar {
           background: #ffffff;
-          border: 1px solid #d1d5db;
-          border-radius: 12px;
-          box-shadow: 0 10px 32px rgba(0, 0, 0, 0.12);
-          padding: 6px;
+          border: 1px solid #e2e8f0;
+          border-radius: 16px;
+          box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08), 0 8px 16px rgba(0, 0, 0, 0.04);
+          padding: 8px;
           z-index: 1000;
           position: fixed !important;
-          backdrop-filter: blur(8px);
+          backdrop-filter: blur(12px);
         }
 
         .ce-inline-tool {
-          width: 32px;
-          height: 32px;
-          padding: 6px;
-          border-radius: 6px;
-          color: #374151;
+          width: 36px;
+          height: 36px;
+          padding: 0;
+          border-radius: 8px;
+          color: #475569;
           cursor: pointer;
           flex-shrink: 0;
           display: flex;
           align-items: center;
           justify-content: center;
-          transition: all 0.15s ease;
+          transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
           background: transparent;
           border: none;
           line-height: 1;
+          font-size: 14px;
         }
 
         .ce-inline-tool:hover {
-          background: #f3f4f6;
-          color: #111827;
+          background: #f1f5f9;
+          color: #1e293b;
+          transform: scale(1.05);
         }
 
         .ce-inline-tool--active {
-          background: #dbeafe !important;
+          background: #eff6ff !important;
           color: #2563eb !important;
+          box-shadow: 0 2px 4px rgba(37, 99, 235, 0.1);
         }
 
         /* =================== POPOVER STYLES =================== */
         .ce-popover {
           background: #ffffff !important;
-          border: 1px solid #d1d5db !important;
-          border-radius: 14px !important;
-          box-shadow: 0 12px 48px rgba(0, 0, 0, 0.15) !important;
-          padding: 12px !important;
+          border: 1px solid #e2e8f0 !important;
+          border-radius: 20px !important;
+          box-shadow: 0 25px 50px rgba(0, 0, 0, 0.08), 0 10px 20px rgba(0, 0, 0, 0.04) !important;
+          padding: 16px !important;
           z-index: 1001;
           position: fixed !important;
-          max-width: 320px;
-          backdrop-filter: blur(8px);
+          max-width: 340px;
+          backdrop-filter: blur(16px);
         }
 
         .ce-popover__container {
@@ -264,28 +272,32 @@ export default function Editor({
         }
 
         .ce-popover-item {
-          border-radius: 10px;
-          padding: 12px;
-          margin: 4px 0;
-          transition: all 0.15s ease;
+          border-radius: 12px;
+          padding: 14px 16px;
+          margin: 2px 0;
+          transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
           display: flex;
           align-items: center;
-          gap: 12px;
+          gap: 14px;
           cursor: pointer;
           background: transparent;
           border: none;
           width: 100%;
           text-align: left;
-          color: #111827;
+          color: #1e293b;
+          font-size: 14px;
+          font-weight: 500;
         }
 
         .ce-popover-item:hover {
-          background: #f3f4f6;
-          transform: translateX(2px);
+          background: #f8fafc;
+          transform: translateX(4px);
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
         }
 
         .ce-popover-item--active {
           background: #eff6ff;
+          color: #2563eb;
         }
 
         .ce-popover-item--active:hover {
@@ -376,15 +388,18 @@ export default function Editor({
         /* =================== TEXT ELEMENTS =================== */
         .ce-paragraph {
           line-height: 1.8;
-          color: #111827;
-          font-size: 15px;
+          color: #334155;
+          font-size: 16px;
           width: 100%;
-          margin: 0;
+          margin: 12px 0;
+          font-weight: 400;
         }
 
         .ce-paragraph[contentEditable=true][data-placeholder]:empty:before {
-          color: #d1d5db;
-          font-size: 15px;
+          color: #94a3b8;
+          font-size: 16px;
+          font-style: normal;
+          font-weight: 400;
         }
 
         .ce-header {
@@ -582,173 +597,37 @@ export default function Editor({
           letter-spacing: 6px;
         }
 
-        /* =================== DARK MODE =================== */
-        @media (prefers-color-scheme: dark) {
-          .editor-container {
-            background: #0f172a;
-          }
+        /* =================== FOCUS STATES =================== */
+        .ce-block--focused {
+          background: rgba(59, 130, 246, 0.02);
+          border-radius: 8px;
+          padding: 4px 8px;
+          margin: 8px -8px;
+          transition: all 0.2s ease;
+        }
 
-          .editor-content {
-            color: #f3f4f6;
-          }
+        /* =================== SELECTION STYLES =================== */
+        ::selection {
+          background: rgba(59, 130, 246, 0.15);
+          color: inherit;
+        }
 
-          .ce-toolbar__content {
-            background: #0f172a;
-            border-bottom-color: #1e293b;
-          }
+        /* =================== SCROLLBAR =================== */
+        .editor-content::-webkit-scrollbar {
+          width: 6px;
+        }
 
-          .ce-toolbar__plus,
-          .ce-toolbar__settings-btn {
-            background: #1f2937;
-            border-color: #374151;
-            color: #60a5fa;
-          }
+        .editor-content::-webkit-scrollbar-track {
+          background: transparent;
+        }
 
-          .ce-toolbar__plus:hover,
-          .ce-toolbar__settings-btn:hover {
-            background: #1e3a8a;
-            border-color: #60a5fa;
-          }
+        .editor-content::-webkit-scrollbar-thumb {
+          background: #cbd5e1;
+          border-radius: 3px;
+        }
 
-          .ce-inline-toolbar {
-            background: #1f2937;
-            border-color: #374151;
-            box-shadow: 0 10px 32px rgba(0, 0, 0, 0.4);
-          }
-
-          .ce-inline-tool {
-            color: #e5e7eb;
-          }
-
-          .ce-inline-tool:hover {
-            background: #374151;
-            color: #f3f4f6;
-          }
-
-          .ce-inline-tool--active {
-            background: #1e3a8a !important;
-            color: #60a5fa !important;
-          }
-
-          .ce-popover {
-            background: #1f2937 !important;
-            border-color: #374151 !important;
-            box-shadow: 0 12px 48px rgba(0, 0, 0, 0.4) !important;
-          }
-
-          .ce-popover-item-separator {
-            background: #374151;
-          }
-
-          .ce-popover-item {
-            color: #f3f4f6;
-          }
-
-          .ce-popover-item:hover {
-            background: #374151;
-            color: #ffffff;
-          }
-
-          .ce-popover-item--active {
-            background: #1e3a8a;
-            color: #93c5fd;
-          }
-
-          .ce-popover-item__icon {
-            background: #374151 !important;
-          }
-
-          .ce-popover-item__icon svg {
-            color: #9ca3af;
-            fill: #9ca3af;
-          }
-
-          .ce-popover-item:hover .ce-popover-item__icon {
-            background: #1e40af !important;
-          }
-
-          .ce-popover-item:hover .ce-popover-item__icon svg {
-            color: #60a5fa !important;
-            fill: #60a5fa !important;
-          }
-
-          .ce-popover-item--active .ce-popover-item__icon {
-            background: #1e40af !important;
-          }
-
-          .ce-popover-item--active .ce-popover-item__icon svg {
-            color: #60a5fa !important;
-            fill: #60a5fa !important;
-          }
-
-          .cdx-search-field {
-            background: #111827 !important;
-            border-color: #374151 !important;
-            color: #f3f4f6 !important;
-          }
-
-          .cdx-search-field:focus {
-            border-color: #60a5fa !important;
-            background: #1f2937 !important;
-            box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.1) !important;
-          }
-
-          .ce-paragraph {
-            color: #e5e7eb;
-          }
-
-          .ce-paragraph[contentEditable=true][data-placeholder]:empty:before {
-            color: #4b5563;
-          }
-
-          .ce-header {
-            color: #f3f4f6;
-          }
-
-          .ce-list li {
-            color: #e5e7eb;
-          }
-
-          .cdx-quote {
-            border-left-color: #60a5fa;
-            color: #cbd5e1;
-          }
-
-          .image-tool__image {
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-          }
-
-          .image-tool__caption {
-            color: #9ca3af;
-          }
-
-          .ce-table {
-            border-color: #374151;
-          }
-
-          .ce-table td,
-          .ce-table th {
-            border-color: #374151;
-            color: #e5e7eb;
-          }
-
-          .ce-table th {
-            background: #1f2937;
-          }
-
-          .cdx-attaches {
-            border-color: #374151;
-            background: #111827;
-          }
-
-          .cdx-attaches:hover {
-            background: #1e3a8a;
-            border-color: #60a5fa;
-          }
-
-          .ce-delimiter::before {
-            color: #374151;
-          }
+        .editor-content::-webkit-scrollbar-thumb:hover {
+          background: #94a3b8;
         }
       `}</style>
     </div>

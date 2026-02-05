@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import dynamic from 'next/dynamic';
 import type { OutputData } from '@editorjs/editorjs';
 
@@ -60,55 +60,85 @@ export default function EditorPage() {
     URL.revokeObjectURL(url);
   };
 
+  // Keyboard shortcuts
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.metaKey || e.ctrlKey) {
+        if (e.key === 's') {
+          e.preventDefault();
+          handleSave();
+        } else if (e.key === 'e') {
+          e.preventDefault();
+          handleExport();
+        }
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [editorData, isSaving]);
+
   return (
-    <div className="min-h-screen bg-linear-to-br from-gray-50 to-gray-100 dark:from-gray-950 dark:to-gray-900">
-      {/* Header */}
-      <header className="sticky top-0 z-40 border-b border-gray-200/50 bg-white/70 backdrop-blur-md dark:border-gray-800/50 dark:bg-gray-950/70">
-        <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between py-4">
-            <div className="flex items-center gap-3">
-              <div className="h-10 w-10 rounded-lg bg-blue-600 flex items-center justify-center">
-                <span className="text-lg font-bold text-white">✏️</span>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100">
+      {/* Clean Header */}
+      <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-xl border-b border-slate-200/60">
+        <div className="mx-auto max-w-5xl px-6">
+          <div className="flex items-center justify-between h-16">
+            {/* Logo & Title */}
+            <div className="flex items-center gap-4">
+              <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center shadow-sm">
+                <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                </svg>
               </div>
               <div>
-                <h1 className="text-lg font-semibold text-gray-900 dark:text-gray-50">Editor</h1>
-                <p className="text-xs text-gray-500 dark:text-gray-400">Rich Text Editor</p>
+                <h1 className="text-lg font-semibold text-slate-900">Content Editor</h1>
+                <p className="text-xs text-slate-500">Create beautiful content</p>
               </div>
             </div>
 
-            <div className="flex items-center gap-4">
+            {/* Actions */}
+            <div className="flex items-center gap-3">
+              {/* Save Status */}
               {savedMessage && (
-                <div className="flex items-center gap-2">
-                  <span className={`text-sm font-medium ${
-                    savedMessage.includes('success') 
-                      ? 'text-green-600 dark:text-green-400' 
-                      : 'text-red-600 dark:text-red-400'
-                  }`}>
-                    {savedMessage}
+                <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-green-50 border border-green-200">
+                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                  <span className="text-sm font-medium text-green-700">
+                    {savedMessage.includes('success') ? 'Saved' : 'Error'}
                   </span>
                 </div>
               )}
               
+              {/* Export Button */}
               <button
                 onClick={handleExport}
                 disabled={!editorData}
-                className="px-3 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed dark:text-gray-400 dark:hover:text-gray-200 dark:hover:bg-gray-800"
+                className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed"
               >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
                 Export
               </button>
               
+              {/* Save Button */}
               <button
                 onClick={handleSave}
                 disabled={!editorData || isSaving}
-                className="px-4 py-2 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-md hover:shadow-lg dark:bg-blue-600 dark:hover:bg-blue-700"
+                className="inline-flex items-center gap-2 px-5 py-2 text-sm font-semibold text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-blue-500/25 hover:shadow-xl hover:shadow-blue-500/30"
               >
                 {isSaving ? (
-                  <span className="flex items-center gap-2">
-                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
-                    Saving
-                  </span>
+                  <>
+                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                    Saving...
+                  </>
                 ) : (
-                  'Save'
+                  <>
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                    Save
+                  </>
                 )}
               </button>
             </div>
@@ -116,26 +146,46 @@ export default function EditorPage() {
         </div>
       </header>
 
-      {/* Main Content */}
-      <main className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 py-8">
-        <div className="rounded-2xl border border-gray-200/50 bg-white shadow-lg shadow-gray-900/5 dark:border-gray-800/50 dark:bg-gray-900 dark:shadow-gray-900/20 overflow-hidden">
-          <Editor
-            onChange={setEditorData}
-            placeholder="Start writing your content here..."
-          />
+      {/* Main Editor Area */}
+      <main className="mx-auto max-w-4xl px-6 py-8">
+        <div className="bg-white rounded-2xl shadow-xl shadow-slate-900/5 border border-slate-200/60 overflow-hidden">
+          {/* Editor Toolbar */}
+          <div className="border-b border-slate-100 bg-slate-50/50 px-6 py-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <span className="text-sm font-medium text-slate-700">Document</span>
+                <div className="flex items-center gap-2 text-xs text-slate-500">
+                  <span>{editorData?.blocks?.length || 0} blocks</span>
+                  <span>•</span>
+                  <span>Auto-save enabled</span>
+                </div>
+              </div>
+              <div className="flex items-center gap-2 text-xs text-slate-400">
+                <kbd className="px-2 py-1 bg-white border border-slate-200 rounded font-mono">Tab</kbd>
+                <span>or</span>
+                <kbd className="px-2 py-1 bg-white border border-slate-200 rounded font-mono">/</kbd>
+                <span>for commands</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Editor Content */}
+          <div className="relative">
+            <Editor
+              onChange={setEditorData}
+              placeholder="Start writing your story..."
+            />
+          </div>
         </div>
       </main>
 
-      {/* Footer Hint */}
-      <footer className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 py-6">
-        <div className="flex items-center justify-between text-xs text-gray-600 dark:text-gray-400">
-          <div className="flex items-center gap-2">
-            <kbd className="rounded border border-gray-300 bg-gray-50 px-2 py-1 font-mono dark:border-gray-700 dark:bg-gray-800">Tab</kbd>
-            <span>or</span>
-            <kbd className="rounded border border-gray-300 bg-gray-50 px-2 py-1 font-mono dark:border-gray-700 dark:bg-gray-800">/</kbd>
-            <span>to open the menu</span>
-          </div>
-          <p>Ready to save {editorData?.blocks?.length || 0} blocks</p>
+      {/* Clean Footer */}
+      <footer className="mx-auto max-w-4xl px-6 py-6">
+        <div className="text-center">
+          <p className="text-sm text-slate-400">
+            Press <kbd className="px-1.5 py-0.5 bg-slate-100 border border-slate-200 rounded text-xs font-mono">Cmd+S</kbd> to save • 
+            <kbd className="px-1.5 py-0.5 bg-slate-100 border border-slate-200 rounded text-xs font-mono ml-1">Cmd+E</kbd> to export
+          </p>
         </div>
       </footer>
     </div>

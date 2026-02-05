@@ -2,15 +2,22 @@ import { r2Storage } from '@/storage';
 import {
   IMAGE_MIME_TYPES,
   VIDEO_MIME_TYPES,
+  AUDIO_MIME_TYPES,
   MAX_IMAGE_SIZE,
   MAX_VIDEO_SIZE,
+  MAX_AUDIO_SIZE,
 } from '@/types/upload';
 
 function generateUploadKey(file: File) {
   const safe = file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
-  const folder = file.type.startsWith('video/')
-    ? 'uploads/videos'
-    : 'uploads/images';
+  let folder = 'uploads/images';
+  
+  if (file.type.startsWith('video/')) {
+    folder = 'uploads/videos';
+  } else if (file.type.startsWith('audio/')) {
+    folder = 'uploads/audio';
+  }
+  
   return `${folder}/${Date.now()}-${safe}`;
 }
 
@@ -25,8 +32,9 @@ export async function POST(req: Request) {
 
     const isImage = IMAGE_MIME_TYPES.includes(file.type);
     const isVideo = VIDEO_MIME_TYPES.includes(file.type);
+    const isAudio = AUDIO_MIME_TYPES.includes(file.type);
 
-    if (!isImage && !isVideo) {
+    if (!isImage && !isVideo && !isAudio) {
       return Response.json({ error: 'Unsupported file type' }, { status: 400 });
     }
 
@@ -38,6 +46,10 @@ export async function POST(req: Request) {
       return Response.json({ error: 'Video too large' }, { status: 400 });
     }
 
+    if (isAudio && file.size > MAX_AUDIO_SIZE) {
+      return Response.json({ error: 'Audio too large' }, { status: 400 });
+    }
+
     const buffer = new Uint8Array(await file.arrayBuffer());
     const key = generateUploadKey(file);
 
@@ -47,10 +59,12 @@ export async function POST(req: Request) {
       mime: file.type,
     });
 
+    const fileType = isImage ? 'image' : isVideo ? 'video' : 'audio';
+
     return Response.json({
       success: true,
       publicUrl,
-      type: isImage ? 'image' : 'video',
+      type: fileType,
     });
   } catch (err) {
     console.error('[UPLOAD]', err);

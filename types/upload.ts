@@ -38,5 +38,14 @@ export const VIDEO_MIME_TYPES = [
   'video/quicktime',
 ];
 
+export const AUDIO_MIME_TYPES = [
+  'audio/mpeg',
+  'audio/mp3',
+  'audio/wav',
+  'audio/ogg',
+  'audio/webm',
+];
+
 export const MAX_IMAGE_SIZE = 10 * 1024 * 1024;
 export const MAX_VIDEO_SIZE = 100 * 1024 * 1024;
+export const MAX_AUDIO_SIZE = 50 * 1024 * 1024;

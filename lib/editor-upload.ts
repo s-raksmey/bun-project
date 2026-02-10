@@ -3,6 +3,8 @@
  * Provides unified upload handlers for images, videos, and audio files
  */
 
+import { AUDIO_MIME_TYPES, PDF_MIME_TYPES } from '@/types/upload';
+
 interface EditorUploadResponse {
   success: 1 | 0;
   file?: {
@@ -99,12 +101,17 @@ export const imageUploader = {
  */
 export const attachesUploader = {
   uploadByFile: async (file: File) => {
+    const allowedTypes = [
+      ...AUDIO_MIME_TYPES,
+      ...PDF_MIME_TYPES,
+    ];
+    if (!allowedTypes.includes(file.type)) {
+      throw new Error('Unsupported file type. Only audio and PDF files are allowed.');
+    }
     const result = await uploadByFile(file);
-    
     if (result.success === 0) {
       throw new Error(result.message || 'Upload failed');
     }
-
     return {
       success: 1,
       file: {

@@ -88,8 +88,9 @@ export const EDITOR_TOOLS = {
     class: Attaches,
     config: {
       uploader: attachesUploader,
-      buttonText: 'Upload File',
+      buttonText: 'Upload File or PDF',
       errorMessage: 'File upload failed',
+      types: 'application/pdf',
     },
   },
 };

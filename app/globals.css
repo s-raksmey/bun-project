@@ -24,3 +24,43 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+.ce-toolbar__plus,
+.ce-toolbar__settings-btn {
+  color: #fff !important;
+  background: #181c2b !important;
+  border: none !important;
+}
+
+.ce-toolbar__plus:hover,
+.ce-toolbar__settings-btn:hover {
+  color: #fff !important;
+  background: #23263a !important;
+}
+
+/* Editor dropdown menu styling */
+
+.ce-popover,
+.ce-popover.ce-popover--opened,
+.ce-popover * {
+  background: #181c2b !important;
+  color: #fff !important;
+}
+
+.ce-popover__item,
+.ce-popover__item * {
+  background: #181c2b !important;
+}
+
+.ce-popover__item:hover,
+.ce-popover__item:hover * {
+  background: #23263a !important;
+}
+
+.ce-popover,
+.ce-popover.ce-popover--opened,
+.ce-popover * {
+  background: #181c2b !important;
+  color: #fff !important;
+  border-color: #181c2b !important;
+}

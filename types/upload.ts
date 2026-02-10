@@ -1,3 +1,8 @@
+export const VIDEO_MIME_TYPES = [
+  'video/mp4',
+  'video/webm',
+  'video/quicktime',
+];
 export interface UploadResult {
   success: boolean;
   url?: string;
@@ -32,11 +37,7 @@ export const IMAGE_MIME_TYPES = [
   'image/gif',
 ];
 
-export const VIDEO_MIME_TYPES = [
-  'video/mp4',
-  'video/webm',
-  'video/quicktime',
-];
+
 
 export const AUDIO_MIME_TYPES = [
   'audio/mpeg',
@@ -45,6 +46,12 @@ export const AUDIO_MIME_TYPES = [
   'audio/ogg',
   'audio/webm',
 ];
+
+export const PDF_MIME_TYPES = [
+  'application/pdf',
+];
+
+export const MAX_PDF_SIZE = 20 * 1024 * 1024;
 
 export const MAX_IMAGE_SIZE = 10 * 1024 * 1024;
 export const MAX_VIDEO_SIZE = 100 * 1024 * 1024;

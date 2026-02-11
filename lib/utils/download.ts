@@ -24,35 +24,33 @@ export function viewPDF(url: string): void {
 export async function downloadPDF(url: string, options: DownloadOptions = {}): Promise<void> {
   const { fileName = 'document.pdf', fallbackToOpen = true } = options;
 
-  // First, get the file as a blob
-  let blob: Blob;
+  // Check if URL is same origin to avoid CORS issues
+  const isSameOrigin = isSameOriginUrl(url);
+  let blob: Blob | null = null;
   
-  try {
-    const response = await fetch(url, {
-      method: 'GET',
-      headers: {
-        'Accept': 'application/pdf',
-      },
-    });
+  // Only try to fetch if same-origin to avoid CORS errors
+  if (isSameOrigin) {
+    try {
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/pdf',
+        },
+      });
 
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
 
-    blob = await response.blob();
-  } catch (error) {
-    console.error('Failed to fetch file:', error);
-    
-    if (fallbackToOpen) {
-      // If we can't fetch, try direct link approach (may not show save dialog)
-      return downloadWithDirectLink(url, fileName);
-    } else {
-      throw error;
+      blob = await response.blob();
+    } catch (error) {
+      console.warn('Same-origin fetch failed, falling back to direct download:', error);
+      blob = null; // Will use direct download fallback
     }
   }
 
-  // Use the modern File System Access API if available (shows native save dialog)
-  if (supportsFileSystemAccess()) {
+  // If we have a blob (same-origin successful fetch), try File System Access API
+  if (blob && supportsFileSystemAccess()) {
     try {
       // Show the native file save dialog
       const fileHandle = await (window as any).showSaveFilePicker({
@@ -84,21 +82,39 @@ export async function downloadPDF(url: string, options: DownloadOptions = {}): P
     }
   }
 
-  // Fallback: Use blob URL with download attribute (may download directly)
-  const blobUrl = URL.createObjectURL(blob);
-  const link = document.createElement('a');
-  link.href = blobUrl;
-  link.download = fileName;
-  link.style.display = 'none';
-  
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-  
-  // Clean up the blob URL
-  setTimeout(() => {
-    URL.revokeObjectURL(blobUrl);
-  }, 1000);
+  // If we have a blob but File System Access API failed/unavailable, use blob download
+  if (blob) {
+    const blobUrl = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = blobUrl;
+    link.download = fileName;
+    link.style.display = 'none';
+    
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    // Clean up the blob URL
+    setTimeout(() => {
+      URL.revokeObjectURL(blobUrl);
+    }, 1000);
+    return;
+  }
+
+  // Fallback: Direct download for cross-origin URLs (no CORS issues)
+  try {
+    downloadWithDirectLink(url, fileName);
+  } catch (error) {
+    console.error('All download methods failed:', error);
+    
+    if (fallbackToOpen) {
+      // Last resort: open in new tab
+      console.warn('Opening in new tab as last resort');
+      window.open(url, '_blank', 'noopener,noreferrer');
+    } else {
+      throw new Error('Download failed: Unable to download file');
+    }
+  }
 }
 
 /**

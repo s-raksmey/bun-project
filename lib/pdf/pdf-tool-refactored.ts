@@ -116,7 +116,7 @@ export default class PDFTool implements BlockTool {
     const actions = document.createElement('div');
     actions.className = 'pdf-card-actions';
 
-    // View button
+    // View button (icon only)
     const viewBtn = document.createElement('button');
     viewBtn.type = 'button';
     viewBtn.className = 'pdf-card-view-btn';
@@ -126,7 +126,6 @@ export default class PDFTool implements BlockTool {
         <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
         <circle cx="12" cy="12" r="3"></circle>
       </svg>
-      View
     `;
     viewBtn.addEventListener('click', this.handleView.bind(this));
 

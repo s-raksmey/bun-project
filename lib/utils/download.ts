@@ -24,35 +24,10 @@ export function viewPDF(url: string): void {
 export async function downloadPDF(url: string, options: DownloadOptions = {}): Promise<void> {
   const { fileName = 'document.pdf', fallbackToOpen = true } = options;
 
-  // Check if URL is same origin to avoid CORS issues
-  const isSameOrigin = isSameOriginUrl(url);
-  let blob: Blob | null = null;
-  
-  // Only try to fetch if same-origin to avoid CORS errors
-  if (isSameOrigin) {
+  // ALWAYS try File System Access API first if supported (this shows the save dialog)
+  if (supportsFileSystemAccess()) {
     try {
-      const response = await fetch(url, {
-        method: 'GET',
-        headers: {
-          'Accept': 'application/pdf',
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      blob = await response.blob();
-    } catch (error) {
-      console.warn('Same-origin fetch failed, falling back to direct download:', error);
-      blob = null; // Will use direct download fallback
-    }
-  }
-
-  // If we have a blob (same-origin successful fetch), try File System Access API
-  if (blob && supportsFileSystemAccess()) {
-    try {
-      // Show the native file save dialog
+      // Show the native file save dialog FIRST
       const fileHandle = await (window as any).showSaveFilePicker({
         suggestedName: fileName,
         types: [
@@ -65,55 +40,106 @@ export async function downloadPDF(url: string, options: DownloadOptions = {}): P
         ],
       });
 
-      // Write the blob to the selected file
+      // User selected a location, now get the file content
+      let blob: Blob;
+      
+      // Check if URL is same origin to determine fetch strategy
+      const isSameOrigin = isSameOriginUrl(url);
+      
+      if (isSameOrigin) {
+        // Same-origin: Use fetch to get blob
+        try {
+          const response = await fetch(url, {
+            method: 'GET',
+            headers: {
+              'Accept': 'application/pdf',
+            },
+          });
+
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+
+          blob = await response.blob();
+        } catch (error) {
+          throw new Error(`Failed to fetch same-origin file: ${error}`);
+        }
+      } else {
+        // Cross-origin: Show user message and open in new tab
+        // Unfortunately, we can't fetch cross-origin files due to CORS
+        alert(`Due to browser security restrictions, cross-origin PDFs will open in a new tab. Please use your browser's save function (Ctrl+S or Cmd+S) to save the file as: ${fileName}`);
+        window.open(url, '_blank', 'noopener,noreferrer');
+        return;
+      }
+
+      // Write the blob to the selected file location
       const writable = await fileHandle.createWritable();
       await writable.write(blob);
       await writable.close();
       
+      console.log(`File saved successfully as: ${fileName}`);
       return; // Success with native save dialog
+      
     } catch (error: any) {
-      // User cancelled the dialog or other error
+      // User cancelled the dialog
       if (error.name === 'AbortError') {
         console.log('User cancelled the save dialog');
         return; // User cancelled, don't show error
       }
+      
       console.warn('File System Access API failed:', error);
-      // Fall through to legacy method
+      // Fall through to legacy methods
     }
   }
 
-  // If we have a blob but File System Access API failed/unavailable, use blob download
-  if (blob) {
-    const blobUrl = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = blobUrl;
-    link.download = fileName;
-    link.style.display = 'none';
-    
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    
-    // Clean up the blob URL
-    setTimeout(() => {
-      URL.revokeObjectURL(blobUrl);
-    }, 1000);
-    return;
+  // Fallback for browsers without File System Access API support
+  console.log('File System Access API not supported, using fallback method');
+  
+  // Check if URL is same origin for fallback strategy
+  const isSameOrigin = isSameOriginUrl(url);
+  
+  if (isSameOrigin) {
+    // Same-origin fallback: fetch and use blob download
+    try {
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/pdf',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const blob = await response.blob();
+      const blobUrl = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = blobUrl;
+      link.download = fileName;
+      link.style.display = 'none';
+      
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      // Clean up the blob URL
+      setTimeout(() => {
+        URL.revokeObjectURL(blobUrl);
+      }, 1000);
+      
+      return;
+    } catch (error) {
+      console.warn('Same-origin fallback failed:', error);
+    }
   }
 
-  // Fallback: Direct download for cross-origin URLs (no CORS issues)
-  try {
-    downloadWithDirectLink(url, fileName);
-  } catch (error) {
-    console.error('All download methods failed:', error);
-    
-    if (fallbackToOpen) {
-      // Last resort: open in new tab
-      console.warn('Opening in new tab as last resort');
-      window.open(url, '_blank', 'noopener,noreferrer');
-    } else {
-      throw new Error('Download failed: Unable to download file');
-    }
+  // Final fallback: Open in new tab for cross-origin or when all else fails
+  if (fallbackToOpen) {
+    console.log('Using final fallback: opening in new tab');
+    window.open(url, '_blank', 'noopener,noreferrer');
+  } else {
+    throw new Error('Download failed: Unable to download file');
   }
 }
 
@@ -141,6 +167,26 @@ function downloadWithDirectLink(url: string, fileName: string): void {
   link.href = url;
   link.download = fileName;
   link.style.display = 'none';
+  
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+}
+
+/**
+ * Download method without download attribute to potentially trigger browser's save dialog
+ */
+function downloadWithoutDownloadAttribute(url: string, fileName: string): void {
+  // Try opening the URL directly without download attribute
+  // This may trigger the browser's native save dialog in some cases
+  const link = document.createElement('a');
+  link.href = url;
+  link.target = '_blank';
+  link.rel = 'noopener noreferrer';
+  link.style.display = 'none';
+  
+  // Add a title to help users understand what's happening
+  link.title = `Download ${fileName}`;
   
   document.body.appendChild(link);
   link.click();

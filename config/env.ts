@@ -5,5 +5,6 @@ export const env = {
     endpoint: process.env.R2_URL,
     accessKeyId: process.env.R2_ACCESS_KEY,
     secretAccessKey: process.env.R2_SECRET_KEY,
+    region: process.env.REGION,
   },
 };

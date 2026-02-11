@@ -1,61 +1,37 @@
 /**
  * Editor.js Upload Utilities for R2 Storage
  * Provides unified upload handlers for images, videos, and audio files
- */
+*/
 
-import { AUDIO_MIME_TYPES, PDF_MIME_TYPES } from '@/types/upload';
+import { uploadFile } from '../storage/upload-utils';
+import type { EditorUploadResponse } from '@/types/upload';
 
-interface EditorUploadResponse {
-  success: 1 | 0;
-  file?: {
-    url: string;
-    name?: string;
-    size?: number;
-    title?: string;
-  };
-  message?: string;
-}
 
 /**
  * Generic file uploader for Editor.js tools
  * Handles image, video, and audio uploads to R2
  */
-export async function uploadByFile(file: File): Promise<EditorUploadResponse> {
-  try {
-    const formData = new FormData();
-    formData.append('file', file);
-
-    const response = await fetch('/api/upload', {
-      method: 'POST',
-      body: formData,
-    });
-
-    const data = await response.json();
-
-    if (!response.ok || !data.success) {
-      return {
-        success: 0,
-        message: data.error || 'Upload failed',
-      };
-    }
-
-    return {
-      success: 1,
-      file: {
-        url: data.publicUrl,
-        name: file.name,
-        size: file.size,
-        title: file.name,
-      },
-    };
-  } catch (error) {
-    console.error('[Editor Upload Error]', error);
-    return {
-      success: 0,
-      message: error instanceof Error ? error.message : 'Upload failed',
-    };
-  }
+export async function uploadByFile(file: File) {
+  return uploadFile(file);
 }
+
+export const pdfUploader = async (file: File) => {
+  if (file.type !== 'application/pdf') {
+    throw new Error('Only PDF files are allowed.');
+  }
+  const result = await uploadFile(file);
+  if (result.success !== 1 || !result.file) {
+    throw new Error(result.message || 'Upload failed');
+  }
+  return {
+    success: 1,
+    file: {
+      url: result.file.url,
+      name: result.file.name || file.name,
+      size: result.file.size || file.size,
+    },
+  };
+};
 
 /**
  * Upload by URL (fetch and re-upload to R2)
@@ -77,7 +53,7 @@ export async function uploadByUrl(url: string): Promise<EditorUploadResponse> {
     const file = new File([blob], filename, { type: blob.type });
 
     // Upload to R2
-    return uploadByFile(file);
+    return uploadFile(file);
   } catch (error) {
     console.error('[Editor URL Upload Error]', error);
     return {
@@ -91,35 +67,6 @@ export async function uploadByUrl(url: string): Promise<EditorUploadResponse> {
  * Image uploader configuration for @editorjs/image
  */
 export const imageUploader = {
-  uploadByFile,
+  uploadByFile: uploadFile,
   uploadByUrl,
-};
-
-/**
- * Attaches uploader configuration for @editorjs/attaches
- * Used for video and audio files
- */
-export const attachesUploader = {
-  uploadByFile: async (file: File) => {
-    const allowedTypes = [
-      ...AUDIO_MIME_TYPES,
-      ...PDF_MIME_TYPES,
-    ];
-    if (!allowedTypes.includes(file.type)) {
-      throw new Error('Unsupported file type. Only audio and PDF files are allowed.');
-    }
-    const result = await uploadByFile(file);
-    if (result.success === 0) {
-      throw new Error(result.message || 'Upload failed');
-    }
-    return {
-      success: 1,
-      file: {
-        url: result.file?.url || '',
-        size: result.file?.size || 0,
-        name: result.file?.name || file.name,
-        extension: file.name.split('.').pop() || '',
-      },
-    };
-  },
 };

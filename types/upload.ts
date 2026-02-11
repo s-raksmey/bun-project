@@ -1,3 +1,14 @@
+
+export interface EditorUploadResponse {
+  success: 1 | 0;
+  file?: {
+    url: string;
+    name?: string;
+    size?: number;
+    title?: string;
+  };
+  message?: string;
+}
 export const VIDEO_MIME_TYPES = [
   'video/mp4',
   'video/webm',
@@ -49,7 +60,14 @@ export const AUDIO_MIME_TYPES = [
 
 export const PDF_MIME_TYPES = [
   'application/pdf',
-];
+  'application/x-pdf',
+  'application/acrobat',
+  'application/vnd.pdf',
+  'text/pdf',
+  'text/x-pdf',
+] as const;
+
+export type PDFMimeType = typeof PDF_MIME_TYPES[number];
 
 export const MAX_PDF_SIZE = 20 * 1024 * 1024;
 

@@ -6,12 +6,13 @@ import Header from '@editorjs/header';
 import List from '@editorjs/list';
 import Quote from '@editorjs/quote';
 import ImageTool from '@editorjs/image';
-import AttachesTool from '@editorjs/attaches';
 import CodeTool from '@editorjs/code';
 import InlineCode from '@editorjs/inline-code';
+import PDFTool from '@/lib/pdf-tool';
 import Embed from '@editorjs/embed';
 import LinkTool from '@editorjs/link';
-import { imageUploader, attachesUploader } from '@/lib/editor-upload';
+import { imageUploader } from '@/lib/editor-upload';
+import { pdfUploader } from '@/lib/editor-upload';
 
 interface EditorProps {
 	data?: OutputData;
@@ -49,10 +50,10 @@ export const Editor: React.FC<EditorProps> = ({ data, onChange }) => {
 								uploader: imageUploader,
 							},
 						},
-						attaches: {
-							class: AttachesTool,
+						pdf: {
+							class: PDFTool,
 							config: {
-								uploader: attachesUploader,
+								uploader: pdfUploader,
 							},
 						},
 					},

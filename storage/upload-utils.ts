@@ -1,28 +1,43 @@
-import type { UploadResult } from '@/types/upload';
+
+import type { EditorUploadResponse } from '@/types/upload';
 
 export async function uploadFile(
   file: File,
   onProgress?: (p: number) => void
-): Promise<UploadResult> {
+): Promise<EditorUploadResponse> {
   try {
-    const form = new FormData();
-    form.append('file', file);
+    const formData = new FormData();
+    formData.append('file', file);
 
-    const res = await fetch('/api/upload', {
+    const response = await fetch('/api/upload', {
       method: 'POST',
-      body: form,
+      body: formData,
     });
 
-    const data = await res.json();
+    const data = await response.json();
 
-    if (!res.ok) {
-      return { success: false, error: data?.error ?? 'Upload failed' };
+    if (!response.ok || !data.success) {
+      return {
+        success: 0,
+        message: data.error || 'Upload failed',
+      };
     }
 
     onProgress?.(100);
 
-    return { success: true, url: data.publicUrl };
-  } catch (err) {
-    return { success: false, error: err instanceof Error ? err.message : 'Upload failed' };
+    return {
+      success: 1,
+      file: {
+        url: data.publicUrl,
+        name: file.name,
+        size: file.size,
+        title: file.name,
+      },
+    };
+  } catch (error) {
+    return {
+      success: 0,
+      message: error instanceof Error ? error.message : 'Upload failed',
+    };
   }
 }

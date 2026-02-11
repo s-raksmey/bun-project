@@ -11,8 +11,8 @@ import Quote from '@editorjs/quote';
 import Code from '@editorjs/code';
 import InlineCode from '@editorjs/inline-code';
 import LinkTool from '@editorjs/link';
-import Attaches from '@editorjs/attaches';
-import { imageUploader, attachesUploader } from './editor-upload';
+import { imageUploader, pdfUploader } from './editor-upload';
+import PDFTool from './pdf-tool';
 
 export const EDITOR_TOOLS = {
   header: {
@@ -83,13 +83,12 @@ export const EDITOR_TOOLS = {
       endpoint: '/api/fetch-url', // Optional: for link preview
     },
   },
-
-  attaches: {
-    class: Attaches,
+  pdf: {
+    class: PDFTool,
     config: {
-      uploader: attachesUploader,
-      buttonText: 'Upload File or PDF',
-      errorMessage: 'File upload failed',
+      uploader: pdfUploader,
+      buttonText: 'Upload PDF',
+      errorMessage: 'PDF upload failed',
       types: 'application/pdf',
     },
   },

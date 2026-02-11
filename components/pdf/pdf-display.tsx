@@ -29,57 +29,43 @@ export const PDFDisplay: React.FC<PDFDisplayProps> = ({
   };
 
   return (
-    <div className={`pdf-display-container ${className}`}>
-      {/* PDF Viewer */}
-      <div className="pdf-viewer-wrapper">
-        <object
-          data={data.url}
-          type="application/pdf"
-          className="pdf-embed"
-          width="100%"
-          height="600"
-        >
-          {/* Fallback content */}
-          <div className="pdf-fallback">
-            <div className="pdf-fallback-content">
-              <div className="pdf-icon">
-                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                  <polyline points="14,2 14,8 20,8"></polyline>
-                  <line x1="16" y1="13" x2="8" y2="13"></line>
-                  <line x1="16" y1="17" x2="8" y2="17"></line>
-                  <polyline points="10,9 9,9 8,9"></polyline>
-                </svg>
-              </div>
-              <h3 className="pdf-fallback-title">PDF Document</h3>
-              <p className="pdf-fallback-description">
-                Your browser doesn't support embedded PDFs. You can download the file instead.
-              </p>
-            </div>
+    <div className={`pdf-card-container ${className}`}>
+      {/* Simple PDF Card */}
+      <div className="pdf-card">
+        {/* PDF Icon and Preview */}
+        <div className="pdf-card-preview">
+          <div className="pdf-card-icon">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+              <polyline points="14,2 14,8 20,8"></polyline>
+              <line x1="16" y1="13" x2="8" y2="13"></line>
+              <line x1="16" y1="17" x2="8" y2="17"></line>
+              <polyline points="10,9 9,9 8,9"></polyline>
+            </svg>
           </div>
-        </object>
-      </div>
+          <span className="pdf-card-label">PDF</span>
+        </div>
 
-      {/* PDF Info and Actions */}
-      <div className="pdf-info-bar">
-        <div className="pdf-file-info">
-          <div className="pdf-file-details">
-            <span className="pdf-file-name">
+        {/* PDF Info */}
+        <div className="pdf-card-info">
+          <div className="pdf-card-details">
+            <h4 className="pdf-card-filename">
               {data.file?.name || data.title || 'PDF Document'}
-            </span>
+            </h4>
             {data.file?.size && (
-              <span className="pdf-file-size">
-                {formatFileSize(data.file.size)}
+              <span className="pdf-card-filesize">
+                ({formatFileSize(data.file.size)})
               </span>
             )}
           </div>
         </div>
 
-        <div className="pdf-actions">
+        {/* PDF Actions */}
+        <div className="pdf-card-actions">
           <button
             type="button"
             onClick={handleDownload}
-            className="pdf-download-btn"
+            className="pdf-card-download-btn"
             title="Download PDF"
           >
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -94,7 +80,7 @@ export const PDFDisplay: React.FC<PDFDisplayProps> = ({
             <button
               type="button"
               onClick={onEdit}
-              className="pdf-edit-btn"
+              className="pdf-card-replace-btn"
               title="Replace PDF"
             >
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">

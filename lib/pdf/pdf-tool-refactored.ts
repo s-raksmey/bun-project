@@ -11,7 +11,7 @@ import {
   isValidPDFData,
   DEFAULT_PDF_CONFIG 
 } from '@/types/pdf';
-import { downloadPDF } from '@/lib/utils/download';
+import { downloadPDF, viewPDF } from '@/lib/utils/download';
 
 export default class PDFTool implements BlockTool {
   private api: any;
@@ -116,7 +116,21 @@ export default class PDFTool implements BlockTool {
     const actions = document.createElement('div');
     actions.className = 'pdf-card-actions';
 
-    // Download button
+    // View button
+    const viewBtn = document.createElement('button');
+    viewBtn.type = 'button';
+    viewBtn.className = 'pdf-card-view-btn';
+    viewBtn.title = 'View PDF';
+    viewBtn.innerHTML = `
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+        <circle cx="12" cy="12" r="3"></circle>
+      </svg>
+      View
+    `;
+    viewBtn.addEventListener('click', this.handleView.bind(this));
+
+    // Download button (icon only)
     const downloadBtn = document.createElement('button');
     downloadBtn.type = 'button';
     downloadBtn.className = 'pdf-card-download-btn';
@@ -127,10 +141,10 @@ export default class PDFTool implements BlockTool {
         <polyline points="7 10 12 15 17 10"></polyline>
         <line x1="12" y1="15" x2="12" y2="3"></line>
       </svg>
-      Download
     `;
     downloadBtn.addEventListener('click', this.handleDownload.bind(this));
 
+    actions.appendChild(viewBtn);
     actions.appendChild(downloadBtn);
 
     // Replace button (if not read-only)
@@ -236,10 +250,15 @@ export default class PDFTool implements BlockTool {
   private async handleDownload(): Promise<void> {
     try {
       const fileName = this.data.file?.name || this.data.title || 'document.pdf';
-      await downloadPDF(this.data.url, { fileName });
+      await downloadPDF(this.data.url, { fileName, fallbackToOpen: false });
     } catch (error) {
       console.error('Download failed:', error);
+      alert('Download failed. Please try again or contact support.');
     }
+  }
+
+  private handleView(): void {
+    viewPDF(this.data.url);
   }
 
   private handleFileSelect(event: Event): void {

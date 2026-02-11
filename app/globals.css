@@ -151,7 +151,43 @@ body {
   flex-shrink: 0;
 }
 
-.pdf-card-download-btn,
+.pdf-card-view-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.5rem 0.75rem;
+  background: #10b981;
+  color: white;
+  border: 1px solid #10b981;
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.pdf-card-view-btn:hover {
+  background: #059669;
+  border-color: #059669;
+}
+
+.pdf-card-download-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  border-radius: 6px;
+  border: 1px solid;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: #3b82f6;
+  color: white;
+  border-color: #3b82f6;
+  min-width: 2.5rem;
+  height: 2.5rem;
+}
+
 .pdf-card-replace-btn {
   display: inline-flex;
   align-items: center;
@@ -164,12 +200,6 @@ body {
   cursor: pointer;
   transition: all 0.2s ease;
   white-space: nowrap;
-}
-
-.pdf-card-download-btn {
-  background: #3b82f6;
-  color: white;
-  border-color: #3b82f6;
 }
 
 .pdf-card-download-btn:hover:not(:disabled) {

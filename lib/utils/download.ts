@@ -9,6 +9,14 @@ export interface DownloadOptions {
 }
 
 /**
+ * Opens a PDF file in a new tab for viewing
+ * @param url - The URL of the PDF file
+ */
+export function viewPDF(url: string): void {
+  window.open(url, '_blank', 'noopener,noreferrer');
+}
+
+/**
  * Downloads a PDF file to the user's device
  * @param url - The URL of the PDF file
  * @param options - Download options
@@ -16,68 +24,85 @@ export interface DownloadOptions {
 export async function downloadPDF(url: string, options: DownloadOptions = {}): Promise<void> {
   const { fileName = 'document.pdf', fallbackToOpen = true } = options;
 
+  // Check if URL is same origin or if we should try blob approach
+  const isSameOrigin = isSameOriginUrl(url);
+  
+  if (isSameOrigin) {
+    try {
+      // For same-origin URLs, try blob approach first
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/pdf',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const blob = await response.blob();
+      
+      // Create a blob URL and trigger download
+      const blobUrl = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = blobUrl;
+      link.download = fileName;
+      link.style.display = 'none';
+      
+      // Add to DOM, click, and cleanup
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      // Clean up the blob URL after a short delay
+      setTimeout(() => {
+        URL.revokeObjectURL(blobUrl);
+      }, 100);
+      
+      return; // Success, exit early
+    } catch (error) {
+      console.warn('Blob download failed, trying direct download:', error);
+    }
+  }
+
+  // Fallback: Direct download approach (works for most cases)
   try {
-    // First, try to fetch the file as a blob
-    const response = await fetch(url, {
-      method: 'GET',
-      headers: {
-        'Accept': 'application/pdf',
-      },
-    });
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    // Check if the response is actually a PDF
-    const contentType = response.headers.get('content-type');
-    if (contentType && !contentType.includes('application/pdf')) {
-      throw new Error('Response is not a PDF file');
-    }
-
-    const blob = await response.blob();
-    
-    // Create a blob URL and trigger download
-    const blobUrl = URL.createObjectURL(blob);
     const link = document.createElement('a');
-    link.href = blobUrl;
+    link.href = url;
     link.download = fileName;
     link.style.display = 'none';
     
-    // Add to DOM, click, and cleanup
+    // Force download behavior
+    link.setAttribute('download', fileName);
+    
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
     
-    // Clean up the blob URL after a short delay
-    setTimeout(() => {
-      URL.revokeObjectURL(blobUrl);
-    }, 100);
-
   } catch (error) {
-    console.error('Download failed:', error);
+    console.error('Direct download failed:', error);
     
     if (fallbackToOpen) {
-      // Fallback: Try using download attribute directly
-      try {
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = fileName;
-        link.target = '_blank';
-        link.rel = 'noopener noreferrer';
-        link.style.display = 'none';
-        
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-      } catch (fallbackError) {
-        console.error('Fallback download failed:', fallbackError);
-        // Last resort: open in new tab
-        window.open(url, '_blank', 'noopener,noreferrer');
-      }
+      // Last resort: open in new tab (but this should not happen for download)
+      console.warn('All download methods failed, this should not happen for download');
+      throw new Error('Download failed: Unable to download file');
     } else {
       throw error;
     }
+  }
+}
+
+/**
+ * Checks if a URL is same origin
+ * @param url - The URL to check
+ */
+function isSameOriginUrl(url: string): boolean {
+  try {
+    const urlObj = new URL(url, window.location.href);
+    return urlObj.origin === window.location.origin;
+  } catch {
+    return false;
   }
 }
 

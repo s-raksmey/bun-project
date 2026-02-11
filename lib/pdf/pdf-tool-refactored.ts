@@ -11,6 +11,7 @@ import {
   isValidPDFData,
   DEFAULT_PDF_CONFIG 
 } from '@/types/pdf';
+import { downloadPDF } from '@/lib/utils/download';
 
 export default class PDFTool implements BlockTool {
   private api: any;
@@ -232,15 +233,13 @@ export default class PDFTool implements BlockTool {
     this.wrapper.appendChild(uploadContainer);
   }
 
-  private handleDownload(): void {
-    const link = document.createElement('a');
-    link.href = this.data.url;
-    link.download = this.data.file?.name || 'document.pdf';
-    link.target = '_blank';
-    link.rel = 'noopener noreferrer';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+  private async handleDownload(): Promise<void> {
+    try {
+      const fileName = this.data.file?.name || this.data.title || 'document.pdf';
+      await downloadPDF(this.data.url, { fileName });
+    } catch (error) {
+      console.error('Download failed:', error);
+    }
   }
 
   private handleFileSelect(event: Event): void {

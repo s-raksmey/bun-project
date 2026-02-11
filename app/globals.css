@@ -74,95 +74,85 @@ body {
   overflow: hidden;
 }
 
-/* PDF Display Container */
-.pdf-display-container {
+/* PDF Card Container */
+.pdf-card-container {
+  margin: 1rem 0;
+}
+
+.pdf-card {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
   border: 1px solid #e5e7eb;
   border-radius: 8px;
-  overflow: hidden;
   background: #ffffff;
+  transition: all 0.2s ease;
 }
 
-.pdf-viewer-wrapper {
-  position: relative;
+.pdf-card:hover {
+  border-color: #d1d5db;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
 }
 
-.pdf-embed {
-  width: 100%;
-  height: 600px;
-  border: none;
-  display: block;
+/* PDF Card Preview */
+.pdf-card-preview {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 60px;
 }
 
-/* PDF Fallback */
-.pdf-fallback {
+.pdf-card-icon {
+  color: #dc2626;
   display: flex;
   align-items: center;
   justify-content: center;
-  height: 600px;
-  background: #f9fafb;
-  border: 2px dashed #d1d5db;
 }
 
-.pdf-fallback-content {
-  text-align: center;
-  padding: 2rem;
-}
-
-.pdf-icon {
-  margin: 0 auto 1rem;
-  color: #6b7280;
-}
-
-.pdf-fallback-title {
-  font-size: 1.25rem;
+.pdf-card-label {
+  font-size: 0.75rem;
   font-weight: 600;
-  color: #374151;
-  margin: 0 0 0.5rem;
-}
-
-.pdf-fallback-description {
   color: #6b7280;
-  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
-/* PDF Info Bar */
-.pdf-info-bar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 1rem;
-  background: #f9fafb;
-  border-top: 1px solid #e5e7eb;
-}
-
-.pdf-file-info {
+/* PDF Card Info */
+.pdf-card-info {
   flex: 1;
+  min-width: 0;
 }
 
-.pdf-file-details {
+.pdf-card-details {
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
 }
 
-.pdf-file-name {
+.pdf-card-filename {
+  font-size: 0.875rem;
   font-weight: 500;
   color: #374151;
-  font-size: 0.875rem;
+  margin: 0;
+  word-break: break-word;
 }
 
-.pdf-file-size {
+.pdf-card-filesize {
   font-size: 0.75rem;
   color: #6b7280;
 }
 
-.pdf-actions {
+/* PDF Card Actions */
+.pdf-card-actions {
   display: flex;
   gap: 0.5rem;
+  flex-shrink: 0;
 }
 
-.pdf-download-btn,
-.pdf-edit-btn {
+.pdf-card-download-btn,
+.pdf-card-replace-btn {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
@@ -173,26 +163,27 @@ body {
   border: 1px solid;
   cursor: pointer;
   transition: all 0.2s ease;
+  white-space: nowrap;
 }
 
-.pdf-download-btn {
+.pdf-card-download-btn {
   background: #3b82f6;
   color: white;
   border-color: #3b82f6;
 }
 
-.pdf-download-btn:hover {
+.pdf-card-download-btn:hover {
   background: #2563eb;
   border-color: #2563eb;
 }
 
-.pdf-edit-btn {
+.pdf-card-replace-btn {
   background: white;
   color: #6b7280;
   border-color: #d1d5db;
 }
 
-.pdf-edit-btn:hover {
+.pdf-card-replace-btn:hover {
   background: #f9fafb;
   color: #374151;
   border-color: #9ca3af;
@@ -378,31 +369,26 @@ body {
 
 /* Dark mode support */
 @media (prefers-color-scheme: dark) {
-  .pdf-display-container {
+  .pdf-card {
     border-color: #374151;
     background: #1f2937;
   }
 
-  .pdf-fallback {
-    background: #111827;
-    border-color: #374151;
+  .pdf-card:hover {
+    border-color: #4b5563;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.3);
   }
 
-  .pdf-fallback-title {
+  .pdf-card-filename {
     color: #f9fafb;
   }
 
-  .pdf-fallback-description {
+  .pdf-card-filesize {
     color: #9ca3af;
   }
 
-  .pdf-info-bar {
-    background: #111827;
-    border-color: #374151;
-  }
-
-  .pdf-file-name {
-    color: #f9fafb;
+  .pdf-card-label {
+    color: #9ca3af;
   }
 
   .pdf-upload-zone {
@@ -449,13 +435,13 @@ body {
     border-color: #3b82f6;
   }
 
-  .pdf-edit-btn {
+  .pdf-card-replace-btn {
     background: #1f2937;
     color: #d1d5db;
     border-color: #374151;
   }
 
-  .pdf-edit-btn:hover {
+  .pdf-card-replace-btn:hover {
     background: #111827;
     color: #f9fafb;
     border-color: #4b5563;
@@ -470,13 +456,19 @@ body {
 
 /* Responsive Design */
 @media (max-width: 768px) {
-  .pdf-info-bar {
+  .pdf-card {
     flex-direction: column;
     align-items: flex-start;
     gap: 1rem;
   }
 
-  .pdf-actions {
+  .pdf-card-preview {
+    flex-direction: row;
+    align-items: center;
+    min-width: auto;
+  }
+
+  .pdf-card-actions {
     width: 100%;
     justify-content: flex-start;
   }
@@ -491,14 +483,6 @@ body {
 
   .pdf-url-submit {
     align-self: flex-start;
-  }
-
-  .pdf-embed {
-    height: 400px;
-  }
-
-  .pdf-fallback {
-    height: 400px;
   }
 }
 

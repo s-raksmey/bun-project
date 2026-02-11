@@ -43,22 +43,29 @@ export async function downloadPDF(url: string, options: DownloadOptions = {}): P
 
       const blob = await response.blob();
       
-      // Create a blob URL and trigger download
+      // Create a blob URL and trigger download with proper browser dialog
       const blobUrl = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = blobUrl;
       link.download = fileName;
       link.style.display = 'none';
       
-      // Add to DOM, click, and cleanup
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+      // Ensure the download attribute is properly set to trigger save dialog
+      link.setAttribute('download', fileName);
       
-      // Clean up the blob URL after a short delay
+      // Add to DOM, trigger click, and cleanup
+      document.body.appendChild(link);
+      
+      // Use a small delay to ensure the link is properly attached
       setTimeout(() => {
-        URL.revokeObjectURL(blobUrl);
-      }, 100);
+        link.click();
+        document.body.removeChild(link);
+        
+        // Clean up the blob URL after download is triggered
+        setTimeout(() => {
+          URL.revokeObjectURL(blobUrl);
+        }, 1000);
+      }, 10);
       
       return; // Success, exit early
     } catch (error) {
@@ -73,12 +80,16 @@ export async function downloadPDF(url: string, options: DownloadOptions = {}): P
     link.download = fileName;
     link.style.display = 'none';
     
-    // Force download behavior
+    // Force download behavior to trigger browser save dialog
     link.setAttribute('download', fileName);
     
     document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    
+    // Use a small delay to ensure proper download dialog
+    setTimeout(() => {
+      link.click();
+      document.body.removeChild(link);
+    }, 10);
     
   } catch (error) {
     console.error('Direct download failed:', error);

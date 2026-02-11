@@ -17,91 +17,118 @@ export function viewPDF(url: string): void {
 }
 
 /**
- * Downloads a PDF file to the user's device
+ * Downloads a PDF file to the user's device with proper save dialog
  * @param url - The URL of the PDF file
  * @param options - Download options
  */
 export async function downloadPDF(url: string, options: DownloadOptions = {}): Promise<void> {
   const { fileName = 'document.pdf', fallbackToOpen = true } = options;
 
-  // Check if URL is same origin or if we should try blob approach
-  const isSameOrigin = isSameOriginUrl(url);
+  // First, get the file as a blob
+  let blob: Blob;
   
-  if (isSameOrigin) {
-    try {
-      // For same-origin URLs, try blob approach first
-      const response = await fetch(url, {
-        method: 'GET',
-        headers: {
-          'Accept': 'application/pdf',
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const blob = await response.blob();
-      
-      // Create a blob URL and trigger download with proper browser dialog
-      const blobUrl = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = blobUrl;
-      link.download = fileName;
-      link.style.display = 'none';
-      
-      // Ensure the download attribute is properly set to trigger save dialog
-      link.setAttribute('download', fileName);
-      
-      // Add to DOM, trigger click, and cleanup
-      document.body.appendChild(link);
-      
-      // Use a small delay to ensure the link is properly attached
-      setTimeout(() => {
-        link.click();
-        document.body.removeChild(link);
-        
-        // Clean up the blob URL after download is triggered
-        setTimeout(() => {
-          URL.revokeObjectURL(blobUrl);
-        }, 1000);
-      }, 10);
-      
-      return; // Success, exit early
-    } catch (error) {
-      console.warn('Blob download failed, trying direct download:', error);
-    }
-  }
-
-  // Fallback: Direct download approach (works for most cases)
   try {
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = fileName;
-    link.style.display = 'none';
-    
-    // Force download behavior to trigger browser save dialog
-    link.setAttribute('download', fileName);
-    
-    document.body.appendChild(link);
-    
-    // Use a small delay to ensure proper download dialog
-    setTimeout(() => {
-      link.click();
-      document.body.removeChild(link);
-    }, 10);
-    
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'Accept': 'application/pdf',
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    blob = await response.blob();
   } catch (error) {
-    console.error('Direct download failed:', error);
+    console.error('Failed to fetch file:', error);
     
     if (fallbackToOpen) {
-      // Last resort: open in new tab (but this should not happen for download)
-      console.warn('All download methods failed, this should not happen for download');
-      throw new Error('Download failed: Unable to download file');
+      // If we can't fetch, try direct link approach (may not show save dialog)
+      return downloadWithDirectLink(url, fileName);
     } else {
       throw error;
     }
   }
+
+  // Use the modern File System Access API if available (shows native save dialog)
+  if (supportsFileSystemAccess()) {
+    try {
+      // Show the native file save dialog
+      const fileHandle = await (window as any).showSaveFilePicker({
+        suggestedName: fileName,
+        types: [
+          {
+            description: 'PDF files',
+            accept: {
+              'application/pdf': ['.pdf'],
+            },
+          },
+        ],
+      });
+
+      // Write the blob to the selected file
+      const writable = await fileHandle.createWritable();
+      await writable.write(blob);
+      await writable.close();
+      
+      return; // Success with native save dialog
+    } catch (error: any) {
+      // User cancelled the dialog or other error
+      if (error.name === 'AbortError') {
+        console.log('User cancelled the save dialog');
+        return; // User cancelled, don't show error
+      }
+      console.warn('File System Access API failed:', error);
+      // Fall through to legacy method
+    }
+  }
+
+  // Fallback: Use blob URL with download attribute (may download directly)
+  const blobUrl = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = blobUrl;
+  link.download = fileName;
+  link.style.display = 'none';
+  
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  
+  // Clean up the blob URL
+  setTimeout(() => {
+    URL.revokeObjectURL(blobUrl);
+  }, 1000);
+}
+
+/**
+ * Checks if the File System Access API is supported
+ */
+function supportsFileSystemAccess(): boolean {
+  return (
+    'showSaveFilePicker' in window &&
+    (() => {
+      try {
+        return window.self === window.top;
+      } catch {
+        return false;
+      }
+    })()
+  );
+}
+
+/**
+ * Fallback download method using direct link
+ */
+function downloadWithDirectLink(url: string, fileName: string): void {
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = fileName;
+  link.style.display = 'none';
+  
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
 }
 
 /**

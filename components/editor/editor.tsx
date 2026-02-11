@@ -8,7 +8,7 @@ import Quote from '@editorjs/quote';
 import ImageTool from '@editorjs/image';
 import CodeTool from '@editorjs/code';
 import InlineCode from '@editorjs/inline-code';
-import PDFTool from '@/lib/pdf-tool';
+import PDFTool from '@/lib/pdf/pdf-tool-refactored';
 import Embed from '@editorjs/embed';
 import LinkTool from '@editorjs/link';
 import { imageUploader } from '@/lib/editor-upload';

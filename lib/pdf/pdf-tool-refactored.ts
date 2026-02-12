@@ -263,7 +263,22 @@ export default class PDFTool implements BlockTool {
       if (result.success) {
         // Show success feedback
         if (downloadBtn) {
-          downloadBtn.textContent = result.method === 'file-system-api' ? 'Saved!' : 'Downloaded!';
+          switch (result.method) {
+            case 'file-system-api':
+              downloadBtn.textContent = 'Saved!';
+              break;
+            case 'download-link':
+              downloadBtn.textContent = 'Downloaded!';
+              break;
+            case 'direct-link':
+              downloadBtn.textContent = 'Initiated!';
+              break;
+            case 'new-tab':
+              downloadBtn.textContent = 'Opened!';
+              break;
+            default:
+              downloadBtn.textContent = 'Done!';
+          }
           setTimeout(() => {
             downloadBtn.textContent = originalText;
             downloadBtn.disabled = false;

@@ -40,6 +40,9 @@ export const PDFDisplay: React.FC<PDFDisplayProps> = ({
           case 'download-link':
             setDownloadStatus('✅ Download started!');
             break;
+          case 'direct-link':
+            setDownloadStatus('✅ Download initiated!');
+            break;
           case 'new-tab':
             setDownloadStatus('📄 File opened in new tab');
             break;

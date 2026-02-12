@@ -11,8 +11,9 @@ import Quote from '@editorjs/quote';
 import Code from '@editorjs/code';
 import InlineCode from '@editorjs/inline-code';
 import LinkTool from '@editorjs/link';
-import { imageUploader, pdfUploader } from './editor-upload';
+import { imageUploader, pdfUploader, audioUploader } from './editor-upload';
 import PDFTool from './pdf/pdf-tool-refactored';
+import AudioTool from './audio/audio-tool';
 
 export const EDITOR_TOOLS = {
   header: {
@@ -90,6 +91,21 @@ export const EDITOR_TOOLS = {
       buttonText: 'Upload PDF',
       errorMessage: 'PDF upload failed',
       types: 'application/pdf',
+    },
+  },
+
+  audio: {
+    class: AudioTool,
+    config: {
+      uploader: audioUploader,
+      buttonText: 'Upload Audio',
+      errorMessage: 'Audio upload failed',
+      types: 'audio/*',
+      maxSize: 50 * 1024 * 1024, // 50MB
+      showControls: true,
+      autoplay: false,
+      loop: false,
+      preload: 'metadata',
     },
   },
 };

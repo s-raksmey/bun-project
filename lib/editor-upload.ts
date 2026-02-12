@@ -6,6 +6,7 @@
 import { uploadFile } from '../storage/upload-utils';
 import type { EditorUploadResponse } from '@/types/upload';
 import { isPDFFile, PDFUploadResponse } from '@/types/pdf';
+import { isAudioFile, AudioUploadResponse } from '@/types/audio';
 
 
 /**
@@ -19,6 +20,27 @@ export async function uploadByFile(file: File) {
 export const pdfUploader = async (file: File): Promise<PDFUploadResponse> => {
   if (!isPDFFile(file)) {
     throw new Error('Only PDF files are allowed.');
+  }
+  
+  const result = await uploadFile(file);
+  if (result.success !== 1 || !result.file) {
+    throw new Error(result.message || 'Upload failed');
+  }
+  
+  return {
+    success: 1,
+    file: {
+      url: result.file.url,
+      name: result.file.name || file.name,
+      size: result.file.size || file.size,
+      title: result.file.title || file.name,
+    },
+  };
+};
+
+export const audioUploader = async (file: File): Promise<AudioUploadResponse> => {
+  if (!isAudioFile(file)) {
+    throw new Error('Only audio files are allowed.');
   }
   
   const result = await uploadFile(file);

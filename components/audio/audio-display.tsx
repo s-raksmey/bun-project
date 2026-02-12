@@ -1,11 +1,11 @@
 /**
- * Simple Audio Display Component
- * Clean, minimal design with essential functionality only
+ * Ultra Simple Audio Display Component
+ * Matches native HTML5 audio player design
  */
 
 'use client';
 
-import React, { useState, useRef, useEffect } from 'react';
+import React from 'react';
 import { AudioDisplayProps } from '@/types/audio';
 
 export const AudioDisplay: React.FC<AudioDisplayProps> = ({
@@ -14,70 +14,34 @@ export const AudioDisplay: React.FC<AudioDisplayProps> = ({
   onEdit,
   className = ''
 }) => {
-  const [isPlaying, setIsPlaying] = useState(false);
-  const audioRef = useRef<HTMLAudioElement>(null);
-
-  useEffect(() => {
-    const audio = audioRef.current;
-    if (!audio) return;
-
-    const handleEnded = () => setIsPlaying(false);
-    const handlePlay = () => setIsPlaying(true);
-    const handlePause = () => setIsPlaying(false);
-
-    audio.addEventListener('ended', handleEnded);
-    audio.addEventListener('play', handlePlay);
-    audio.addEventListener('pause', handlePause);
-
-    return () => {
-      audio.removeEventListener('ended', handleEnded);
-      audio.removeEventListener('play', handlePlay);
-      audio.removeEventListener('pause', handlePause);
-    };
-  }, []);
-
-  const togglePlayPause = () => {
-    const audio = audioRef.current;
-    if (!audio) return;
-
-    if (isPlaying) {
-      audio.pause();
-    } else {
-      audio.play();
-    }
-  };
-
   const fileName = data.title || data.file?.title || data.file?.name || 'Audio File';
 
   return (
-    <div className={`simple-audio ${className}`}>
-      <audio ref={audioRef} src={data.url} preload="metadata" />
+    <div className={`ultra-simple-audio ${className}`}>
+      <audio 
+        controls 
+        src={data.url}
+        preload="metadata"
+        className="audio-player"
+      >
+        Your browser does not support the audio element.
+      </audio>
       
-      <div className="audio-player">
+      <div className="audio-filename">
+        {fileName}
+      </div>
+
+      {!readOnly && onEdit && (
         <button
           type="button"
-          className="play-button"
-          onClick={togglePlayPause}
-          aria-label={isPlaying ? 'Pause' : 'Play'}
+          className="replace-button"
+          onClick={onEdit}
+          aria-label="Replace audio"
         >
-          {isPlaying ? '⏸️' : '▶️'}
+          Replace
         </button>
-        
-        <div className="audio-info">
-          <span className="audio-name">{fileName}</span>
-        </div>
-
-        {!readOnly && onEdit && (
-          <button
-            type="button"
-            className="edit-button"
-            onClick={onEdit}
-            aria-label="Replace audio"
-          >
-            ✏️
-          </button>
-        )}
-      </div>
+      )}
     </div>
   );
 };
+

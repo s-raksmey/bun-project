@@ -1,64 +1,45 @@
 /**
- * Simple Audio Tool Styles
- * Clean, minimal design
+ * Ultra Simple Audio Tool Styles
+ * Native HTML5 audio player with clean filename
  */
 
-/* Simple Audio Display */
-.simple-audio {
+/* Ultra Simple Audio Display */
+.ultra-simple-audio {
   margin: 1rem 0;
-  border: 1px solid #e1e5e9;
-  border-radius: 8px;
   padding: 1rem;
   background: #ffffff;
+  border: 1px solid #e1e5e9;
+  border-radius: 8px;
 }
 
 .audio-player {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
+  width: 100%;
+  height: 40px;
+  margin-bottom: 0.75rem;
 }
 
-.play-button {
-  background: none;
-  border: none;
-  font-size: 1.5rem;
-  cursor: pointer;
-  padding: 0.25rem;
-  border-radius: 4px;
-  transition: background-color 0.2s;
-}
-
-.play-button:hover {
-  background-color: #f7fafc;
-}
-
-.play-button:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.audio-info {
-  flex: 1;
-}
-
-.audio-name {
+.audio-filename {
   font-size: 0.875rem;
   color: #2d3748;
   font-weight: 500;
+  margin-bottom: 0.5rem;
+  word-break: break-word;
 }
 
-.edit-button {
-  background: none;
-  border: none;
-  font-size: 1rem;
+.replace-button {
+  background: #f7fafc;
+  border: 1px solid #e2e8f0;
+  color: #4a5568;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  font-size: 0.875rem;
   cursor: pointer;
-  padding: 0.25rem;
-  border-radius: 4px;
-  transition: background-color 0.2s;
+  transition: all 0.2s;
 }
 
-.edit-button:hover {
-  background-color: #f7fafc;
+.replace-button:hover {
+  background: #edf2f7;
+  border-color: #cbd5e0;
 }
 
 /* Simple Audio Upload */
@@ -103,18 +84,24 @@
 
 /* Dark mode support */
 @media (prefers-color-scheme: dark) {
-  .simple-audio {
+  .ultra-simple-audio {
     background: #2d3748;
     border-color: #4a5568;
   }
   
-  .audio-name {
+  .audio-filename {
     color: #e2e8f0;
   }
   
-  .play-button:hover,
-  .edit-button:hover {
-    background-color: #4a5568;
+  .replace-button {
+    background: #4a5568;
+    border-color: #718096;
+    color: #e2e8f0;
+  }
+  
+  .replace-button:hover {
+    background: #718096;
+    border-color: #a0aec0;
   }
   
   .upload-area {

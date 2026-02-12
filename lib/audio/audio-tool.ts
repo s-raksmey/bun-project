@@ -87,27 +87,25 @@ export default class AudioTool implements BlockTool {
     this.wrapper.innerHTML = '';
 
     const container = document.createElement('div');
-    container.classList.add('audio-container');
+    container.classList.add('clean-audio-container');
 
-    // Audio player
+    // Audio player (matches the clean design from image_1)
     const audioPlayer = document.createElement('audio');
     audioPlayer.src = this.data.url;
     audioPlayer.controls = this.config.showControls !== false;
     audioPlayer.preload = this.config.preload || 'metadata';
     audioPlayer.loop = this.config.loop || false;
     audioPlayer.autoplay = this.config.autoplay || false;
-    audioPlayer.classList.add('audio-player');
+    audioPlayer.classList.add('clean-audio-player');
 
-    // Audio info
-    const audioInfo = document.createElement('div');
-    audioInfo.classList.add('audio-info');
+    // Audio filename (below the player)
+    const filenameElement = document.createElement('div');
+    filenameElement.classList.add('clean-audio-filename');
+    filenameElement.textContent = this.data.title || this.data.file?.title || this.data.file?.name || 'Audio File';
 
-    const titleElement = document.createElement('div');
-    titleElement.classList.add('audio-title');
-    titleElement.textContent = this.data.title || this.data.file?.title || this.data.file?.name || 'Audio File';
-
+    // Audio metadata (duration and format)
     const metaElement = document.createElement('div');
-    metaElement.classList.add('audio-meta');
+    metaElement.classList.add('clean-audio-meta');
     
     const metaParts: string[] = [];
     if (this.data.file?.duration) {
@@ -119,37 +117,25 @@ export default class AudioTool implements BlockTool {
     
     metaElement.textContent = metaParts.join(' • ');
 
-    audioInfo.appendChild(titleElement);
-    if (metaParts.length > 0) {
-      audioInfo.appendChild(metaElement);
-    }
-
-    container.appendChild(audioPlayer);
-    container.appendChild(audioInfo);
-
-    // Action buttons
+    // Replace button (simple text button)
+    let replaceBtn: HTMLElement | null = null;
     if (!this.readOnly) {
-      const actionsContainer = document.createElement('div');
-      actionsContainer.classList.add('audio-actions');
-
-
-
-      const replaceBtn = document.createElement('button');
-      replaceBtn.type = 'button';
-      replaceBtn.classList.add('audio-replace-btn');
-      replaceBtn.innerHTML = `
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M3 7v10a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2H5a2 2 0 0 0-2-2z"></path>
-          <polyline points="8 1 12 5 16 1"></polyline>
-        </svg>
-        Replace
-      `;
+      replaceBtn = document.createElement('button');
+      replaceBtn.classList.add('clean-audio-replace');
+      replaceBtn.textContent = 'Replace';
       replaceBtn.addEventListener('click', () => {
         this.renderUploadForm();
       });
+    }
 
-      actionsContainer.appendChild(replaceBtn);
-      container.appendChild(actionsContainer);
+    // Assemble the clean layout
+    container.appendChild(audioPlayer);
+    container.appendChild(filenameElement);
+    if (metaParts.length > 0) {
+      container.appendChild(metaElement);
+    }
+    if (replaceBtn) {
+      container.appendChild(replaceBtn);
     }
 
     this.wrapper.appendChild(container);
@@ -161,38 +147,38 @@ export default class AudioTool implements BlockTool {
     this.wrapper.innerHTML = '';
 
     const form = document.createElement('div');
-    form.classList.add('audio-upload-form');
+    form.classList.add('clean-audio-upload-form');
 
     const fileInput = document.createElement('input');
     fileInput.type = 'file';
     fileInput.accept = this.config.types || 'audio/*';
-    fileInput.classList.add('audio-file-input');
+    fileInput.classList.add('clean-audio-file-input');
     fileInput.style.display = 'none';
 
     const uploadArea = document.createElement('div');
-    uploadArea.classList.add('audio-upload-area');
+    uploadArea.classList.add('clean-audio-upload-area');
     uploadArea.innerHTML = `
-      <div class="audio-upload-icon">
+      <div class="clean-audio-upload-icon">
         <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
           <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
         </svg>
       </div>
-      <p class="audio-upload-text">${this.config.buttonText || 'Upload Audio'}</p>
-      <p class="audio-upload-hint">MP3, WAV, OGG, AAC, M4A, FLAC</p>
+      <p class="clean-audio-upload-text">Upload Audio</p>
+      <p class="clean-audio-upload-hint">MP3, WAV, OGG, AAC, M4A, FLAC</p>
     `;
 
     const urlInput = document.createElement('input');
     urlInput.type = 'url';
     urlInput.placeholder = 'Or paste audio URL';
-    urlInput.classList.add('audio-url-input');
+    urlInput.classList.add('clean-audio-url-input');
 
     const progress = document.createElement('div');
-    progress.classList.add('audio-progress');
+    progress.classList.add('clean-audio-progress');
     progress.style.display = 'none';
 
     const error = document.createElement('div');
-    error.classList.add('audio-error');
+    error.classList.add('clean-audio-error');
     error.style.display = 'none';
 
     form.appendChild(fileInput);
@@ -258,8 +244,8 @@ export default class AudioTool implements BlockTool {
   private async handleFileUpload(file: File): Promise<void> {
     if (!this.wrapper) return;
 
-    const progress = this.wrapper.querySelector('.audio-progress') as HTMLElement;
-    const error = this.wrapper.querySelector('.audio-error') as HTMLElement;
+    const progress = this.wrapper.querySelector('.clean-audio-progress') as HTMLElement;
+    const error = this.wrapper.querySelector('.clean-audio-error') as HTMLElement;
     
     error.style.display = 'none';
     progress.style.display = 'block';
@@ -353,7 +339,7 @@ export default class AudioTool implements BlockTool {
   private async handleUrlUpload(url: string): Promise<void> {
     if (!this.wrapper) return;
 
-    const error = this.wrapper.querySelector('.audio-error') as HTMLElement;
+    const error = this.wrapper.querySelector('.clean-audio-error') as HTMLElement;
     error.style.display = 'none';
 
     if (!this.isValidUrl(url)) {
@@ -453,7 +439,7 @@ export default class AudioTool implements BlockTool {
   private showError(message: string): void {
     if (!this.wrapper) return;
 
-    const error = this.wrapper.querySelector('.audio-error') as HTMLElement;
+    const error = this.wrapper.querySelector('.clean-audio-error') as HTMLElement;
     if (error) {
       error.textContent = message;
       error.style.display = 'block';

@@ -1,10 +1,25 @@
 /**
  * Enhanced PDF Download Utilities
- * Handles proper file downloads with CORS support and fallbacks
+ * Handles proper file downloads with native save dialog and fallbacks
  */
 
 export interface DownloadOptions {
   fileName?: string;
+}
+
+export interface DownloadResult {
+  success: boolean;
+  method: 'file-system-api' | 'download-link' | 'new-tab';
+  error?: string;
+}
+
+export enum DownloadError {
+  USER_CANCELLED = 'User cancelled the download',
+  NETWORK_ERROR = 'Network error occurred while downloading',
+  PERMISSION_DENIED = 'Permission denied to save file',
+  UNSUPPORTED_BROWSER = 'Browser does not support file downloads',
+  INVALID_URL = 'Invalid or inaccessible URL',
+  UNKNOWN_ERROR = 'An unknown error occurred'
 }
 
 /**
@@ -19,11 +34,21 @@ export function viewPDF(url: string): void {
  * Downloads a PDF file to the user's device with proper save dialog
  * @param url - The URL of the PDF file
  * @param options - Download options
+ * @returns Promise<DownloadResult> - Result of the download operation
  */
-export async function downloadPDF(url: string, options: DownloadOptions = {}): Promise<void> {
+export async function downloadPDF(url: string, options: DownloadOptions = {}): Promise<DownloadResult> {
+  if (!url || typeof url !== 'string') {
+    return {
+      success: false,
+      method: 'new-tab',
+      error: DownloadError.INVALID_URL
+    };
+  }
+
   let fileName = options.fileName || getFileNameFromUrl(url);
-  // 1. Try File System Access API (native save dialog, no alerts)
-  if ('showSaveFilePicker' in window) {
+
+  // 1. Try File System Access API (native save dialog)
+  if (supportsFileSystemAccess()) {
     try {
       // @ts-expect-error: showSaveFilePicker is not yet in the standard TypeScript DOM lib
       const fileHandle = await window.showSaveFilePicker({
@@ -35,25 +60,61 @@ export async function downloadPDF(url: string, options: DownloadOptions = {}): P
           },
         ],
       });
-      const response = await fetch(url, { method: 'GET', headers: { 'Accept': 'application/pdf' } });
-      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+
+      const response = await fetch(url, { 
+        method: 'GET', 
+        headers: { 'Accept': 'application/pdf' } 
+      });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+
       fileName = getFileNameFromUrl(url, response) || fileName;
       const blob = await response.blob();
       const writable = await fileHandle.createWritable();
       await writable.write(blob);
       await writable.close();
-      return;
-    } catch {
-      // If user cancels or API fails, fall through to fallback
+
+      return {
+        success: true,
+        method: 'file-system-api'
+      };
+    } catch (error: any) {
+      // Handle specific errors
+      if (error.name === 'AbortError') {
+        return {
+          success: false,
+          method: 'file-system-api',
+          error: DownloadError.USER_CANCELLED
+        };
+      }
+      if (error.name === 'NotAllowedError') {
+        return {
+          success: false,
+          method: 'file-system-api',
+          error: DownloadError.PERMISSION_DENIED
+        };
+      }
+      // Fall through to fallback method
     }
   }
-  // 2. Fallback: Use <a download> (default browser download, no alerts, no new tab)
+
+  // 2. Fallback: Use <a download> (traditional browser download)
   try {
-    const response = await fetch(url, { method: 'GET', headers: { 'Accept': 'application/pdf' } });
-    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+    const response = await fetch(url, { 
+      method: 'GET', 
+      headers: { 'Accept': 'application/pdf' } 
+    });
+    
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+    }
+
     fileName = getFileNameFromUrl(url, response) || fileName;
     const blob = await response.blob();
     const blobUrl = URL.createObjectURL(blob);
+    
     const link = document.createElement('a');
     link.href = blobUrl;
     link.download = fileName;
@@ -61,35 +122,70 @@ export async function downloadPDF(url: string, options: DownloadOptions = {}): P
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+    
+    // Clean up blob URL after a delay
     setTimeout(() => URL.revokeObjectURL(blobUrl), 1000);
-    return;
-  } catch {
-    // If fetch fails (e.g. CORS), fallback to opening in new tab
-    window.open(url, '_blank', 'noopener,noreferrer');
-    return;
+
+    return {
+      success: true,
+      method: 'download-link'
+    };
+  } catch (error: any) {
+    // 3. Final fallback: Open in new tab
+    try {
+      window.open(url, '_blank', 'noopener,noreferrer');
+      return {
+        success: true,
+        method: 'new-tab'
+      };
+    } catch {
+      return {
+        success: false,
+        method: 'new-tab',
+        error: DownloadError.UNKNOWN_ERROR
+      };
+    }
   }
 }
 
 /**
  * Checks if the File System Access API is supported
+ * @returns boolean - True if the API is supported
  */
+export function supportsFileSystemAccess(): boolean {
+  return 'showSaveFilePicker' in window && 
+         typeof window.showSaveFilePicker === 'function';
+}
 
 /**
- * Fallback download method using direct link
+ * Gets user-friendly error message for download failures
+ * @param error - The error that occurred
+ * @param method - The download method that was attempted
+ * @returns string - User-friendly error message
  */
-
-/**
- * Download method without download attribute to potentially trigger browser's save dialog
- */
-
-/**
- * Checks if a URL is same origin
- * @param url - The URL to check
- */
+export function getDownloadErrorMessage(error: string, method: string): string {
+  switch (error) {
+    case DownloadError.USER_CANCELLED:
+      return 'Download was cancelled. You can try again anytime.';
+    case DownloadError.NETWORK_ERROR:
+      return 'Network error occurred. Please check your connection and try again.';
+    case DownloadError.PERMISSION_DENIED:
+      return 'Permission denied. Please allow file downloads and try again.';
+    case DownloadError.UNSUPPORTED_BROWSER:
+      return 'Your browser doesn\'t support file downloads. Please try a different browser.';
+    case DownloadError.INVALID_URL:
+      return 'The file URL is invalid or inaccessible. Please contact support.';
+    default:
+      return method === 'new-tab' 
+        ? 'Download failed. The file has been opened in a new tab instead.'
+        : 'Download failed. Please try again or contact support.';
+  }
+}
 
 /**
  * Checks if a URL is downloadable (same origin or CORS-enabled)
  * @param url - The URL to check
+ * @returns Promise<boolean> - True if the URL is downloadable
  */
 export async function isDownloadable(url: string): Promise<boolean> {
   try {

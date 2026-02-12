@@ -146,46 +146,32 @@ export default class AudioTool implements BlockTool {
 
     this.wrapper.innerHTML = '';
 
-    const form = document.createElement('div');
-    form.classList.add('clean-audio-upload-form');
+    const container = document.createElement('div');
+    container.classList.add('minimal-audio-upload-container');
 
     const fileInput = document.createElement('input');
     fileInput.type = 'file';
     fileInput.accept = this.config.types || 'audio/*';
-    fileInput.classList.add('clean-audio-file-input');
     fileInput.style.display = 'none';
 
-    const uploadArea = document.createElement('div');
-    uploadArea.classList.add('clean-audio-upload-area');
-    uploadArea.innerHTML = `
-      <div class="clean-audio-upload-icon">
-        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
-          <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
-        </svg>
-      </div>
-      <p class="clean-audio-upload-text">Upload Audio</p>
-      <p class="clean-audio-upload-hint">MP3, WAV, OGG, AAC, M4A, FLAC</p>
-    `;
-
-    const urlInput = document.createElement('input');
-    urlInput.type = 'url';
-    urlInput.placeholder = 'Or paste audio URL';
-    urlInput.classList.add('clean-audio-url-input');
+    // Simple upload button (similar to PDF upload design)
+    const uploadButton = document.createElement('button');
+    uploadButton.type = 'button';
+    uploadButton.classList.add('minimal-audio-upload-btn');
+    uploadButton.textContent = 'Upload Audio';
 
     const progress = document.createElement('div');
-    progress.classList.add('clean-audio-progress');
+    progress.classList.add('minimal-audio-progress');
     progress.style.display = 'none';
 
     const error = document.createElement('div');
-    error.classList.add('clean-audio-error');
+    error.classList.add('minimal-audio-error');
     error.style.display = 'none';
 
-    form.appendChild(fileInput);
-    form.appendChild(uploadArea);
-    form.appendChild(urlInput);
-    form.appendChild(progress);
-    form.appendChild(error);
+    container.appendChild(fileInput);
+    container.appendChild(uploadButton);
+    container.appendChild(progress);
+    container.appendChild(error);
 
     // Event Listeners
     fileInput.addEventListener('change', (e: Event) => {
@@ -195,57 +181,18 @@ export default class AudioTool implements BlockTool {
       }
     });
 
-    uploadArea.addEventListener('click', () => {
+    uploadButton.addEventListener('click', () => {
       fileInput.click();
     });
 
-    uploadArea.addEventListener('dragover', (e: DragEvent) => {
-      e.preventDefault();
-      uploadArea.classList.add('audio-upload-area--dragover');
-    });
-
-    uploadArea.addEventListener('dragleave', () => {
-      uploadArea.classList.remove('audio-upload-area--dragover');
-    });
-
-    uploadArea.addEventListener('drop', (e: DragEvent) => {
-      e.preventDefault();
-      uploadArea.classList.remove('audio-upload-area--dragover');
-      
-      if (e.dataTransfer && e.dataTransfer.files[0]) {
-        const file = e.dataTransfer.files[0];
-        if (isAudioFile(file)) {
-          this.handleFileUpload(file);
-        } else {
-          this.showError(this.config.errorMessage || 'Please upload an audio file');
-        }
-      }
-    });
-
-    urlInput.addEventListener('paste', () => {
-      setTimeout(() => {
-        const url = urlInput.value.trim();
-        if (url) {
-          this.handleUrlUpload(url);
-        }
-      }, 100);
-    });
-
-    urlInput.addEventListener('blur', () => {
-      const url = urlInput.value.trim();
-      if (url) {
-        this.handleUrlUpload(url);
-      }
-    });
-
-    this.wrapper.appendChild(form);
+    this.wrapper.appendChild(container);
   }
 
   private async handleFileUpload(file: File): Promise<void> {
     if (!this.wrapper) return;
 
-    const progress = this.wrapper.querySelector('.clean-audio-progress') as HTMLElement;
-    const error = this.wrapper.querySelector('.clean-audio-error') as HTMLElement;
+    const progress = this.wrapper.querySelector('.minimal-audio-progress') as HTMLElement;
+    const error = this.wrapper.querySelector('.minimal-audio-error') as HTMLElement;
     
     error.style.display = 'none';
     progress.style.display = 'block';
@@ -336,43 +283,7 @@ export default class AudioTool implements BlockTool {
     }
   }
 
-  private async handleUrlUpload(url: string): Promise<void> {
-    if (!this.wrapper) return;
 
-    const error = this.wrapper.querySelector('.clean-audio-error') as HTMLElement;
-    error.style.display = 'none';
-
-    if (!this.isValidUrl(url)) {
-      this.showError('Please enter a valid HTTP/HTTPS URL');
-      return;
-    }
-
-    if (!this.isAudioUrl(url)) {
-      this.showError('URL does not appear to be an audio file');
-      return;
-    }
-
-    try {
-      // Basic validation - try to access the URL
-      const response = await fetch(url, { method: 'HEAD' });
-      if (!response.ok) {
-        throw new Error('URL not accessible');
-      }
-
-      const contentType = response.headers.get('content-type');
-      if (contentType && !contentType.startsWith('audio/')) {
-        throw new Error('URL does not point to an audio file');
-      }
-
-      this.data = { 
-        url,
-        title: this.extractTitleFromUrl(url)
-      };
-      this.renderAudioDisplay();
-    } catch (err) {
-      this.showError(`Invalid audio URL: ${err instanceof Error ? err.message : 'Unable to access'}`);
-    }
-  }
 
   private async getAudioMetadata(file: File): Promise<{ duration?: number }> {
     return new Promise((resolve) => {
@@ -439,7 +350,7 @@ export default class AudioTool implements BlockTool {
   private showError(message: string): void {
     if (!this.wrapper) return;
 
-    const error = this.wrapper.querySelector('.clean-audio-error') as HTMLElement;
+    const error = this.wrapper.querySelector('.minimal-audio-error') as HTMLElement;
     if (error) {
       error.textContent = message;
       error.style.display = 'block';
@@ -457,10 +368,7 @@ export default class AudioTool implements BlockTool {
   onPaste(event: PasteEvent): void {
     const detail = event.detail;
 
-    if ('key' in detail && detail.key === 'url' && 'data' in detail && detail.data) {
-      this.handleUrlUpload(detail.data as string);
-    } 
-    else if ('key' in detail && detail.key === 'file' && 'file' in detail && detail.file) {
+    if ('key' in detail && detail.key === 'file' && 'file' in detail && detail.file) {
       const file = detail.file;
       if (file && typeof file === 'object' && 'type' in file && isAudioFile(file as File)) {
         this.handleFileUpload(file as File);

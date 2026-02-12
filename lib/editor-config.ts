@@ -12,7 +12,7 @@ import Code from '@editorjs/code';
 import InlineCode from '@editorjs/inline-code';
 import LinkTool from '@editorjs/link';
 import { imageUploader, pdfUploader, audioUploader } from './editor-upload';
-import PDFTool from './pdf/pdf-tool-refactored';
+import PDFTool from './pdf/pdf-tool';
 import AudioTool from './audio/audio-tool';
 
 export const EDITOR_TOOLS = {

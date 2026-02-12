@@ -81,27 +81,33 @@ export async function downloadPDF(url: string, options: DownloadOptions = {}): P
         success: true,
         method: 'file-system-api'
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       // Handle specific errors
-      if (error.name === 'AbortError') {
-        return {
-          success: false,
-          method: 'file-system-api',
-          error: DownloadError.USER_CANCELLED
-        };
-      }
-      if (error.name === 'NotAllowedError') {
-        return {
-          success: false,
-          method: 'file-system-api',
-          error: DownloadError.PERMISSION_DENIED
-        };
-      }
-      // Check for CORS or network errors and fall through to fallback
-      if (error.name === 'TypeError' || error.message.includes('CORS') || error.message.includes('fetch')) {
-        // CORS error - fall through to direct link method
-      } else {
-        // Other errors - fall through to fallback method
+      if (typeof error === 'object' && error !== null && 'name' in error) {
+        const err = error as { name: string; message?: string };
+        if (err.name === 'AbortError') {
+          return {
+            success: false,
+            method: 'file-system-api',
+            error: DownloadError.USER_CANCELLED
+          };
+        }
+        if (err.name === 'NotAllowedError') {
+          return {
+            success: false,
+            method: 'file-system-api',
+            error: DownloadError.PERMISSION_DENIED
+          };
+        }
+        // Check for CORS or network errors and fall through to fallback
+        if (
+          err.name === 'TypeError' ||
+          (typeof err.message === 'string' && (err.message.includes('CORS') || err.message.includes('fetch')))
+        ) {
+          // CORS error - fall through to direct link method
+        } else {
+          // Other errors - fall through to fallback method
+        }
       }
     }
   }
@@ -137,27 +143,37 @@ export async function downloadPDF(url: string, options: DownloadOptions = {}): P
       success: true,
       method: 'download-link'
     };
-  } catch (error: any) {
+  } catch (error: unknown) {
     // Check if it's a CORS error
-    if (error.name === 'TypeError' || error.message.includes('CORS') || error.message.includes('fetch')) {
-      // CORS blocked - try direct link download without fetch
-      try {
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = fileName;
-        link.target = '_blank';
-        link.rel = 'noopener noreferrer';
-        link.style.display = 'none';
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+    if (
+      typeof error === 'object' &&
+      error !== null &&
+      ('name' in error || 'message' in error)
+    ) {
+      const err = error as { name?: string; message?: string };
+      if (
+        err.name === 'TypeError' ||
+        (typeof err.message === 'string' && (err.message.includes('CORS') || err.message.includes('fetch')))
+      ) {
+        // CORS blocked - try direct link download without fetch
+        try {
+          const link = document.createElement('a');
+          link.href = url;
+          link.download = fileName;
+          link.target = '_blank';
+          link.rel = 'noopener noreferrer';
+          link.style.display = 'none';
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
 
-        return {
-          success: true,
-          method: 'direct-link'
-        };
-      } catch {
-        // Fall through to final fallback
+          return {
+            success: true,
+            method: 'direct-link'
+          };
+        } catch {
+          // Fall through to final fallback
+        }
       }
     }
   }

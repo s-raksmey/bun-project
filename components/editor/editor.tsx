@@ -8,10 +8,11 @@ import Quote from '@editorjs/quote';
 import ImageTool from '@editorjs/image';
 import CodeTool from '@editorjs/code';
 import InlineCode from '@editorjs/inline-code';
-import PDFTool from '@/lib/pdf/pdf-tool-refactored';
+import PDFTool from '@/lib/pdf/pdf-tool';
 import Embed from '@editorjs/embed';
+import AudioTool from '@/lib/audio/audio-tool';
 import LinkTool from '@editorjs/link';
-import { imageUploader } from '@/lib/editor-upload';
+import { audioUploader, imageUploader } from '@/lib/editor-upload';
 import { pdfUploader } from '@/lib/editor-upload';
 
 interface EditorProps {
@@ -54,6 +55,12 @@ export const Editor: React.FC<EditorProps> = ({ data, onChange }) => {
 							class: PDFTool,
 							config: {
 								uploader: pdfUploader,
+							},
+						},
+						audio: {
+							class: AudioTool,
+							config: {
+								uploader: audioUploader,
 							},
 						},
 					},

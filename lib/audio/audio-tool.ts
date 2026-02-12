@@ -7,18 +7,15 @@ import { BlockTool, PasteEvent } from '@editorjs/editorjs';
 import { 
   AudioData, 
   AudioToolConstructorOptions, 
-  AudioUploadConfig,
   AudioToolConfig,
   isValidAudioData,
   DEFAULT_AUDIO_TOOL_CONFIG,
   isAudioFile,
   getAudioFormatFromMimeType,
-  formatDuration,
-  formatFileSize
-} from '@/types/audio';
+  formatDuration} from '@/types/audio';
 
 export default class AudioTool implements BlockTool {
-  private api: any;
+  private api: unknown;
   private readOnly: boolean;
   private data: AudioData;
   private config: AudioToolConfig;
@@ -283,7 +280,20 @@ export default class AudioTool implements BlockTool {
     }
 
     try {
-      let result;
+      // Define the expected upload result type
+      type UploadResult = {
+        success: 1;
+        file: {
+          url: string;
+          name?: string;
+          size?: number;
+          title?: string;
+          artist?: string;
+        };
+        message?: string;
+      };
+
+      let result: unknown;
 
       if (this.config.uploader) {
         result = await this.config.uploader(file);
@@ -293,27 +303,45 @@ export default class AudioTool implements BlockTool {
         throw new Error('No upload method configured');
       }
 
-      if (result.success === 1 && result.file) {
+      // Type guard for expected result structure
+      function isUploadResult(obj: unknown): obj is UploadResult {
+        return (
+          typeof obj === 'object' &&
+          obj !== null &&
+          'success' in obj &&
+          (obj as { success: number }).success === 1 &&
+          'file' in obj &&
+          typeof (obj as { file: unknown }).file === 'object' &&
+          (obj as { file: unknown }).file !== null
+        );
+      }
+
+      if (isUploadResult(result)) {
+        const fileResult = result.file;
         // Get audio metadata
         const audioMetadata = await this.getAudioMetadata(file);
         
         this.data = {
-          url: result.file.url,
-          title: result.file.title || file.name,
-          artist: result.file.artist,
+          url: fileResult.url,
+          title: fileResult.title || file.name,
+          artist: fileResult.artist,
           file: {
-            url: result.file.url,
-            name: result.file.name || file.name,
-            size: result.file.size || file.size,
-            title: result.file.title || file.name,
-            artist: result.file.artist,
+            url: fileResult.url,
+            name: fileResult.name || file.name,
+            size: fileResult.size || file.size,
+            title: fileResult.title || file.name,
+            artist: fileResult.artist,
             duration: audioMetadata.duration,
             format: getAudioFormatFromMimeType(file.type) || undefined,
           },
         };
         this.renderAudioDisplay();
       } else {
-        throw new Error(result.message || 'Upload failed');
+        throw new Error(
+          typeof result === 'object' && result !== null && 'message' in result
+            ? (result as { message?: string }).message
+            : 'Upload failed'
+        );
       }
     } catch (err) {
       this.showError(`Upload failed: ${err instanceof Error ? err.message : 'Unknown error'}`);
@@ -406,7 +434,7 @@ export default class AudioTool implements BlockTool {
     }
   }
 
-  private async uploadToEndpoint(file: File): Promise<any> {
+  private async uploadToEndpoint(file: File): Promise<unknown> {
     const formData = new FormData();
     formData.append('file', file);
 

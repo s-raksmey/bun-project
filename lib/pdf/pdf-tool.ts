@@ -14,7 +14,7 @@ import {
 import { viewPDF } from '@/lib/utils/download';
 
 export default class PDFTool implements BlockTool {
-  private api: any;
+  private api: unknown;
   private readOnly: boolean;
   private data: PDFData;
   private config: PDFUploadConfig;
@@ -363,7 +363,7 @@ export default class PDFTool implements BlockTool {
         </svg>
         ${message}
       `;
-      errorDisplay.style.display = 'block';
+      (errorDisplay as HTMLElement).style.display = 'block';
     }
   }
 

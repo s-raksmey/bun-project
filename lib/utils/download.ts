@@ -9,7 +9,7 @@ export interface DownloadOptions {
 
 export interface DownloadResult {
   success: boolean;
-  method: 'file-system-api' | 'download-link' | 'new-tab';
+  method: 'file-system-api' | 'download-link' | 'direct-link' | 'new-tab';
   error?: string;
 }
 
@@ -63,7 +63,8 @@ export async function downloadPDF(url: string, options: DownloadOptions = {}): P
 
       const response = await fetch(url, { 
         method: 'GET', 
-        headers: { 'Accept': 'application/pdf' } 
+        headers: { 'Accept': 'application/pdf' },
+        mode: 'cors'
       });
       
       if (!response.ok) {
@@ -96,15 +97,21 @@ export async function downloadPDF(url: string, options: DownloadOptions = {}): P
           error: DownloadError.PERMISSION_DENIED
         };
       }
-      // Fall through to fallback method
+      // Check for CORS or network errors and fall through to fallback
+      if (error.name === 'TypeError' || error.message.includes('CORS') || error.message.includes('fetch')) {
+        // CORS error - fall through to direct link method
+      } else {
+        // Other errors - fall through to fallback method
+      }
     }
   }
 
-  // 2. Fallback: Use <a download> (traditional browser download)
+  // 2. Try direct download link (works for same-origin or CORS-enabled URLs)
   try {
     const response = await fetch(url, { 
       method: 'GET', 
-      headers: { 'Accept': 'application/pdf' } 
+      headers: { 'Accept': 'application/pdf' },
+      mode: 'cors'
     });
     
     if (!response.ok) {
@@ -131,20 +138,43 @@ export async function downloadPDF(url: string, options: DownloadOptions = {}): P
       method: 'download-link'
     };
   } catch (error: any) {
-    // 3. Final fallback: Open in new tab
-    try {
-      window.open(url, '_blank', 'noopener,noreferrer');
-      return {
-        success: true,
-        method: 'new-tab'
-      };
-    } catch {
-      return {
-        success: false,
-        method: 'new-tab',
-        error: DownloadError.UNKNOWN_ERROR
-      };
+    // Check if it's a CORS error
+    if (error.name === 'TypeError' || error.message.includes('CORS') || error.message.includes('fetch')) {
+      // CORS blocked - try direct link download without fetch
+      try {
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = fileName;
+        link.target = '_blank';
+        link.rel = 'noopener noreferrer';
+        link.style.display = 'none';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+
+        return {
+          success: true,
+          method: 'direct-link'
+        };
+      } catch {
+        // Fall through to final fallback
+      }
     }
+  }
+
+  // 3. Final fallback: Open in new tab
+  try {
+    window.open(url, '_blank', 'noopener,noreferrer');
+    return {
+      success: true,
+      method: 'new-tab'
+    };
+  } catch {
+    return {
+      success: false,
+      method: 'new-tab',
+      error: DownloadError.UNKNOWN_ERROR
+    };
   }
 }
 

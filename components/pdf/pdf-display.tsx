@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { PDFDisplayProps } from '@/types/pdf';
-import { downloadPDF, viewPDF } from '@/lib/utils/download';
+import { downloadPDF, viewPDF, getDownloadErrorMessage, DownloadResult } from '@/lib/utils/download';
 
 /**
  * PDF Display Component
@@ -15,6 +15,7 @@ export const PDFDisplay: React.FC<PDFDisplayProps> = ({
   className = '',
 }) => {
   const [isDownloading, setIsDownloading] = useState(false);
+  const [downloadStatus, setDownloadStatus] = useState<string>('');
 
   const formatFileSize = (bytes: number): string => {
     return (bytes / 1024 / 1024).toFixed(2) + ' MB';
@@ -24,13 +25,43 @@ export const PDFDisplay: React.FC<PDFDisplayProps> = ({
     if (isDownloading) return;
     
     setIsDownloading(true);
+    setDownloadStatus('Preparing download...');
+    
     try {
       const fileName = data.file?.name || data.title || 'document.pdf';
-      await downloadPDF(data.url, { fileName, fallbackToOpen: false });
+      const result: DownloadResult = await downloadPDF(data.url, { fileName });
+      
+      if (result.success) {
+        // Show success message based on method used
+        switch (result.method) {
+          case 'file-system-api':
+            setDownloadStatus('✅ File saved successfully!');
+            break;
+          case 'download-link':
+            setDownloadStatus('✅ Download started!');
+            break;
+          case 'new-tab':
+            setDownloadStatus('📄 File opened in new tab');
+            break;
+        }
+        
+        // Clear success message after 3 seconds
+        setTimeout(() => setDownloadStatus(''), 3000);
+      } else {
+        // Show user-friendly error message
+        const errorMessage = getDownloadErrorMessage(
+          result.error || 'Unknown error', 
+          result.method
+        );
+        setDownloadStatus(`❌ ${errorMessage}`);
+        
+        // Clear error message after 5 seconds
+        setTimeout(() => setDownloadStatus(''), 5000);
+      }
     } catch (error) {
       console.error('Download failed:', error);
-      // Show user-friendly error message
-      alert('Download failed. Please try again or contact support.');
+      setDownloadStatus('❌ Download failed. Please try again or contact support.');
+      setTimeout(() => setDownloadStatus(''), 5000);
     } finally {
       setIsDownloading(false);
     }
@@ -71,6 +102,13 @@ export const PDFDisplay: React.FC<PDFDisplayProps> = ({
             )}
           </div>
         </div>
+
+        {/* Download Status */}
+        {downloadStatus && (
+          <div className="pdf-card-status">
+            <span className="pdf-card-status-text">{downloadStatus}</span>
+          </div>
+        )}
 
         {/* PDF Actions */}
         <div className="pdf-card-actions">

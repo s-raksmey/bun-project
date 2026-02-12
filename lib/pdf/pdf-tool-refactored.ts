@@ -11,7 +11,7 @@ import {
   isValidPDFData,
   DEFAULT_PDF_CONFIG 
 } from '@/types/pdf';
-import { downloadPDF, viewPDF } from '@/lib/utils/download';
+import { downloadPDF, viewPDF, getDownloadErrorMessage, DownloadResult } from '@/lib/utils/download';
 
 export default class PDFTool implements BlockTool {
   private api: any;
@@ -247,11 +247,57 @@ export default class PDFTool implements BlockTool {
   }
 
   private async handleDownload(): Promise<void> {
+    const downloadBtn = this.wrapper.querySelector('.pdf-card-download-btn') as HTMLButtonElement;
+    const originalText = downloadBtn?.textContent || '';
+    
     try {
+      // Update button to show loading state
+      if (downloadBtn) {
+        downloadBtn.disabled = true;
+        downloadBtn.textContent = 'Downloading...';
+      }
+
       const fileName = this.data.file?.name || this.data.title || 'document.pdf';
-      await downloadPDF(this.data.url, { fileName, fallbackToOpen: false });
+      const result: DownloadResult = await downloadPDF(this.data.url, { fileName });
+      
+      if (result.success) {
+        // Show success feedback
+        if (downloadBtn) {
+          downloadBtn.textContent = result.method === 'file-system-api' ? 'Saved!' : 'Downloaded!';
+          setTimeout(() => {
+            downloadBtn.textContent = originalText;
+            downloadBtn.disabled = false;
+          }, 2000);
+        }
+      } else {
+        // Show error feedback
+        const errorMessage = getDownloadErrorMessage(
+          result.error || 'Unknown error', 
+          result.method
+        );
+        
+        if (downloadBtn) {
+          downloadBtn.textContent = 'Failed';
+          setTimeout(() => {
+            downloadBtn.textContent = originalText;
+            downloadBtn.disabled = false;
+          }, 2000);
+        }
+        
+        // Show detailed error to user
+        alert(errorMessage);
+      }
     } catch (error) {
       console.error('Download failed:', error);
+      
+      if (downloadBtn) {
+        downloadBtn.textContent = 'Failed';
+        setTimeout(() => {
+          downloadBtn.textContent = originalText;
+          downloadBtn.disabled = false;
+        }, 2000);
+      }
+      
       alert('Download failed. Please try again or contact support.');
     }
   }

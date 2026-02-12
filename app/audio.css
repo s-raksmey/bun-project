@@ -3,6 +3,51 @@
  * Native HTML5 audio player with clean filename
  */
 
+/* Minimal Audio Upload Design - Simple button like PDF upload */
+.minimal-audio-upload-container {
+  margin: 1rem 0;
+  padding: 2rem;
+  border: 2px dashed #4a5568;
+  border-radius: 8px;
+  background: transparent;
+  text-align: center;
+}
+
+.minimal-audio-upload-btn {
+  background: #007cba;
+  color: #ffffff;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.minimal-audio-upload-btn:hover:not(:disabled) {
+  background: #005a8b;
+}
+
+.minimal-audio-upload-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.minimal-audio-progress {
+  font-size: 0.875rem;
+  color: #63b3ed;
+  margin-top: 1rem;
+  text-align: center;
+}
+
+.minimal-audio-error {
+  font-size: 0.875rem;
+  color: #fc8181;
+  margin-top: 1rem;
+  text-align: center;
+}
+
 /* Clean Audio Design - Matches the layout from provided images */
 .clean-audio-container {
   margin: 1rem 0;

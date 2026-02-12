@@ -183,25 +183,6 @@ export function getDownloadErrorMessage(error: string, method: string): string {
 }
 
 /**
- * Checks if a URL is downloadable (same origin or CORS-enabled)
- * @param url - The URL to check
- * @returns Promise<boolean> - True if the URL is downloadable
- */
-export async function isDownloadable(url: string): Promise<boolean> {
-  try {
-    const response = await fetch(url, { 
-      method: 'HEAD',
-      headers: {
-        'Accept': 'application/pdf',
-      },
-    });
-    return response.ok;
-  } catch {
-    return false;
-  }
-}
-
-/**
  * Gets the filename from a URL or Content-Disposition header
  * @param url - The URL to extract filename from
  * @param response - Optional response object to check headers

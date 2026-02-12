@@ -173,23 +173,7 @@ body {
   border-color: #059669;
 }
 
-.pdf-card-download-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0.5rem;
-  font-size: 0.875rem;
-  font-weight: 500;
-  border-radius: 6px;
-  border: 1px solid;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  background: #3b82f6;
-  color: white;
-  border-color: #3b82f6;
-  min-width: 2.5rem;
-  height: 2.5rem;
-}
+
 
 .pdf-card-replace-btn {
   display: inline-flex;
@@ -205,17 +189,7 @@ body {
   white-space: nowrap;
 }
 
-.pdf-card-download-btn:hover:not(:disabled) {
-  background: #2563eb;
-  border-color: #2563eb;
-}
 
-.pdf-card-download-btn:disabled {
-  background: #9ca3af;
-  border-color: #9ca3af;
-  cursor: not-allowed;
-  opacity: 0.7;
-}
 
 .pdf-card-replace-btn {
   background: white;

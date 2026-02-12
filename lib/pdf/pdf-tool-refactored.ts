@@ -11,7 +11,7 @@ import {
   isValidPDFData,
   DEFAULT_PDF_CONFIG 
 } from '@/types/pdf';
-import { downloadPDF, viewPDF, getDownloadErrorMessage, DownloadResult } from '@/lib/utils/download';
+import { viewPDF } from '@/lib/utils/download';
 
 export default class PDFTool implements BlockTool {
   private api: any;
@@ -129,22 +129,7 @@ export default class PDFTool implements BlockTool {
     `;
     viewBtn.addEventListener('click', this.handleView.bind(this));
 
-    // Download button (icon only)
-    const downloadBtn = document.createElement('button');
-    downloadBtn.type = 'button';
-    downloadBtn.className = 'pdf-card-download-btn';
-    downloadBtn.title = 'Download PDF';
-    downloadBtn.innerHTML = `
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-        <polyline points="7 10 12 15 17 10"></polyline>
-        <line x1="12" y1="15" x2="12" y2="3"></line>
-      </svg>
-    `;
-    downloadBtn.addEventListener('click', this.handleDownload.bind(this));
-
     actions.appendChild(viewBtn);
-    actions.appendChild(downloadBtn);
 
     // Replace button (if not read-only)
     if (!this.readOnly) {
@@ -246,76 +231,7 @@ export default class PDFTool implements BlockTool {
     this.wrapper.appendChild(uploadContainer);
   }
 
-  private async handleDownload(): Promise<void> {
-    const downloadBtn = this.wrapper.querySelector('.pdf-card-download-btn') as HTMLButtonElement;
-    const originalText = downloadBtn?.textContent || '';
-    
-    try {
-      // Update button to show loading state
-      if (downloadBtn) {
-        downloadBtn.disabled = true;
-        downloadBtn.textContent = 'Downloading...';
-      }
 
-      const fileName = this.data.file?.name || this.data.title || 'document.pdf';
-      const result: DownloadResult = await downloadPDF(this.data.url, { fileName });
-      
-      if (result.success) {
-        // Show success feedback
-        if (downloadBtn) {
-          switch (result.method) {
-            case 'file-system-api':
-              downloadBtn.textContent = 'Saved!';
-              break;
-            case 'download-link':
-              downloadBtn.textContent = 'Downloaded!';
-              break;
-            case 'direct-link':
-              downloadBtn.textContent = 'Initiated!';
-              break;
-            case 'new-tab':
-              downloadBtn.textContent = 'Opened!';
-              break;
-            default:
-              downloadBtn.textContent = 'Done!';
-          }
-          setTimeout(() => {
-            downloadBtn.textContent = originalText;
-            downloadBtn.disabled = false;
-          }, 2000);
-        }
-      } else {
-        // Show error feedback
-        const errorMessage = getDownloadErrorMessage(
-          result.error || 'Unknown error', 
-          result.method
-        );
-        
-        if (downloadBtn) {
-          downloadBtn.textContent = 'Failed';
-          setTimeout(() => {
-            downloadBtn.textContent = originalText;
-            downloadBtn.disabled = false;
-          }, 2000);
-        }
-        
-        // Show detailed error to user
-        alert(errorMessage);
-      }
-    } catch (error) {
-      console.error('Download failed:', error);
-      
-      if (downloadBtn) {
-        downloadBtn.textContent = 'Failed';
-        setTimeout(() => {
-          downloadBtn.textContent = originalText;
-          downloadBtn.disabled = false;
-        }, 2000);
-      }
-      
-      alert('Download failed. Please try again or contact support.');
-    }
-  }
 
   private handleView(): void {
     viewPDF(this.data.url);

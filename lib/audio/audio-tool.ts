@@ -113,17 +113,11 @@ export default class AudioTool implements BlockTool {
     metaElement.classList.add('audio-meta');
     
     const metaParts: string[] = [];
-    if (this.data.artist || this.data.file?.artist) {
-      metaParts.push(`Artist: ${this.data.artist || this.data.file?.artist}`);
-    }
     if (this.data.file?.duration) {
-      metaParts.push(`Duration: ${formatDuration(this.data.file.duration)}`);
-    }
-    if (this.data.file?.size) {
-      metaParts.push(`Size: ${formatFileSize(this.data.file.size)}`);
+      metaParts.push(formatDuration(this.data.file.duration));
     }
     if (this.data.file?.format) {
-      metaParts.push(`Format: ${this.data.file.format.toUpperCase()}`);
+      metaParts.push(this.data.file.format.toUpperCase());
     }
     
     metaElement.textContent = metaParts.join(' • ');
@@ -141,18 +135,7 @@ export default class AudioTool implements BlockTool {
       const actionsContainer = document.createElement('div');
       actionsContainer.classList.add('audio-actions');
 
-      const downloadBtn = document.createElement('button');
-      downloadBtn.type = 'button';
-      downloadBtn.classList.add('audio-download-btn');
-      downloadBtn.innerHTML = `
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-15"></path>
-          <polyline points="7 10 12 15 17 10"></polyline>
-          <line x1="12" y1="15" x2="12" y2="3"></line>
-        </svg>
-        Download
-      `;
-      downloadBtn.addEventListener('click', this.handleDownload.bind(this));
+
 
       const replaceBtn = document.createElement('button');
       replaceBtn.type = 'button';
@@ -168,7 +151,6 @@ export default class AudioTool implements BlockTool {
         this.renderUploadForm();
       });
 
-      actionsContainer.appendChild(downloadBtn);
       actionsContainer.appendChild(replaceBtn);
       container.appendChild(actionsContainer);
     }
@@ -199,13 +181,13 @@ export default class AudioTool implements BlockTool {
           <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
         </svg>
       </div>
-      <p class="audio-upload-text">${this.config.buttonText || 'Click to upload audio or drag and drop'}</p>
-      <p class="audio-upload-hint">Supported formats: MP3, WAV, OGG, AAC, M4A, FLAC</p>
+      <p class="audio-upload-text">${this.config.buttonText || 'Upload Audio'}</p>
+      <p class="audio-upload-hint">MP3, WAV, OGG, AAC, M4A, FLAC</p>
     `;
 
     const urlInput = document.createElement('input');
     urlInput.type = 'url';
-    urlInput.placeholder = 'Or paste audio URL here...';
+    urlInput.placeholder = 'Or paste audio URL';
     urlInput.classList.add('audio-url-input');
 
     const progress = document.createElement('div');
@@ -398,45 +380,7 @@ export default class AudioTool implements BlockTool {
     });
   }
 
-  private async handleDownload(): Promise<void> {
-    const downloadBtn = this.wrapper?.querySelector('.audio-download-btn') as HTMLButtonElement;
-    const originalText = downloadBtn?.innerHTML || '';
-    
-    try {
-      if (downloadBtn) {
-        downloadBtn.disabled = true;
-        downloadBtn.innerHTML = 'Downloading...';
-      }
 
-      // Create download link
-      const link = document.createElement('a');
-      link.href = this.data.url;
-      link.download = this.data.file?.name || this.data.title || 'audio-file';
-      link.target = '_blank';
-      link.rel = 'noopener noreferrer';
-      link.style.display = 'none';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-
-      if (downloadBtn) {
-        downloadBtn.innerHTML = 'Downloaded!';
-        setTimeout(() => {
-          downloadBtn.innerHTML = originalText;
-          downloadBtn.disabled = false;
-        }, 2000);
-      }
-    } catch (error) {
-      if (downloadBtn) {
-        downloadBtn.innerHTML = 'Failed';
-        setTimeout(() => {
-          downloadBtn.innerHTML = originalText;
-          downloadBtn.disabled = false;
-        }, 2000);
-      }
-      console.error('Download failed:', error);
-    }
-  }
 
   private isValidUrl(url: string): boolean {
     try {
